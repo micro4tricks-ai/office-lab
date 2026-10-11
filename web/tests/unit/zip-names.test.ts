@@ -7,7 +7,7 @@ describe('safeEntryName (zip-slip guard)', () => {
 		['a/../../etc/passwd', 'a/etc/passwd'],
 		['../../x.png', 'x.png'],
 		['/abs/path.txt', 'abs/path.txt'],
-		['C:\Windows\evil.dll', 'C_/Windows/evil.dll'],
+		[String.raw`C:\Windows\evil.dll`, 'C_/Windows/evil.dll'],
 		['./././', 'file'],
 		['ok\u0000name.txt', 'okname.txt']
 	])('%s → %s', (input, out) => {
