@@ -1,0 +1,12 @@
+# Build context for deploy/Caddy.Dockerfile (the repo root): only the web app is needed.
+**/node_modules
+web/build
+web/.svelte-kit
+web/test-results
+web/playwright-report
+web/static/pdfjs
+web/static/pagedjs
+web/static/tesseract
+server
+docs
+.git

@@ -14,7 +14,6 @@ services:
       - "443:443/udp"
     environment:
       DOMAIN: ${DOMAIN:-:80}
-      EMAIL: ${EMAIL:-}
       BODY_MAX: ${BODY_MAX:-130MB}
     volumes:
       - caddy_data:/data
