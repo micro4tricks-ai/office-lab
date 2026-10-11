@@ -46,5 +46,11 @@
 	"err.unknown": "حدث خطأ غير متوقع أثناء التحويل.",
 	"footer.oss": "مشروع مفتوح المصدر",
 	"footer.source": "الكود المصدري",
-	"redirect.go": "اذهب إلى الموقع"
+	"redirect.go": "اذهب إلى الموقع",
+	"tool.needImage": "اختر صورة الشعار أولًا.",
+	"note.kept-original": "الأصل أصغر بالفعل، فأبقيناه كما هو",
+	"note.metadata-removed": "حُذفت البيانات (EXIF/الموقع)",
+	"note.no-metadata": "لم تكن بها بيانات مخفية",
+	"note.orientation-applied": "حُذفت البيانات وثُبّت اتجاه الصورة",
+	"note.target-missed": "لم نصل للحجم المطلوب؛ هذا أصغر ما أمكن"
 }

@@ -27,11 +27,19 @@ describe('registry', () => {
 		}
 	});
 
-	it('every engine exists and loads', async () => {
+	it('every engine exists and its adapter loads', async () => {
 		for (const t of tools) {
 			expect(engines[t.engine], t.engine).toBeTypeOf('function');
-			const a = await t.load();
-			expect(a.convert).toBeTypeOf('function');
+			const a = await engines[t.engine]();
+			expect(a.convert, t.engine).toBeTypeOf('function');
+			expect(t.load, t.id).toBeTypeOf('function');
+		}
+	});
+
+	it('conditional options point at a real option', () => {
+		for (const t of tools) {
+			const ids = new Set((t.options ?? []).map((o) => o.id));
+			for (const o of t.options ?? []) if (o.when) expect(ids.has(o.when.id), `${t.id}.${o.id}`).toBe(true);
 		}
 	});
 

@@ -1,8 +1,10 @@
-import { engines } from '../adapters';
+import { inWorker } from '../workers/proxy';
+import { imageTools } from './image-tools';
 import type { Tool } from './types';
 
 /** Single source of truth: UI, routes, SEO pages and capability checks come from here. */
 export const tools: Tool[] = [
+	...imageTools,
 	{
 		id: 'txt-to-html',
 		category: 'document',
@@ -10,7 +12,7 @@ export const tools: Tool[] = [
 		to: ['html'],
 		runtime: 'browser',
 		engine: 'text',
-		load: engines.text,
+		load: inWorker('text'),
 		options: [
 			{
 				id: 'dir',
@@ -42,3 +44,11 @@ export const tools: Tool[] = [
 ];
 
 export const toolById = (id: string) => tools.find((t) => t.id === id);
+
+const ALIASES: Record<string, string> = { jpeg: 'jpg', jfif: 'jpg', tif: 'tiff', heif: 'heic' };
+
+/** Readable, de-duplicated format names (no MIME types): "JPG · PNG · HEIC". `max` trims with "+N". */
+export function formatList(list: string[], max = Infinity) {
+	const names = [...new Set(list.filter((f) => !f.includes('/')).map((f) => (ALIASES[f] ?? f).toUpperCase()))];
+	return names.length > max ? [...names.slice(0, max), `+${names.length - max}`] : names;
+}

@@ -46,5 +46,11 @@
 	"err.unknown": "Something went wrong during conversion.",
 	"footer.oss": "Open-source project",
 	"footer.source": "Source code",
-	"redirect.go": "Go to the site"
+	"redirect.go": "Go to the site",
+	"tool.needImage": "Choose the logo image first.",
+	"note.kept-original": "The original was already smaller, so it was kept",
+	"note.metadata-removed": "Metadata (EXIF/location) removed",
+	"note.no-metadata": "It had no hidden metadata",
+	"note.orientation-applied": "Metadata removed and rotation applied",
+	"note.target-missed": "Could not reach the target; this is the smallest possible"
 }

@@ -17,6 +17,7 @@
 	import { downloadFile, downloadZip } from '../download';
 	import Icon from './Icon.svelte';
 	import ProgressBar from './ProgressBar.svelte';
+	import Thumb from './Thumb.svelte';
 
 	let {
 		lang,
@@ -26,6 +27,16 @@
 	}: { lang: Lang; items: Item[]; maxMB: number; onremove?: (id: number) => void } = $props();
 
 	const outputs = $derived(items.flatMap((i) => i.outputs));
+	const total = (i: Item) => i.outputs.reduce((s, o) => s + o.bytes.byteLength, 0);
+	const preview = (i: Item) => i.outputs.find((o) => o.type.startsWith('image/'));
+	/** −42% / +8%, only when one file came out of one file. */
+	function change(i: Item) {
+		if (i.outputs.length !== 1 || !i.file.size) return null;
+		const pct = Math.round(((total(i) - i.file.size) / i.file.size) * 100);
+		return pct === 0 ? null : pct;
+	}
+	const pctText = (lang: Lang, n: number) =>
+		new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en', { style: 'percent', signDisplay: 'always' }).format(n / 100);
 </script>
 
 <section class="results" aria-labelledby="results-title">
@@ -40,15 +51,25 @@
 	</div>
 	<ul>
 		{#each items as item (item.id)}
-			<li class:error={item.status === 'error'}>
-				<span class="ficon"><Icon name="file" /></span>
+			<li class:error={item.status === 'error'} data-status={item.status}>
+				{#if item.status === 'done' && preview(item)}
+					<Thumb file={preview(item)!} />
+				{:else}
+					<span class="ficon"><Icon name="file" /></span>
+				{/if}
 				<div class="info">
 					<p class="name" dir="auto">{item.file.name}</p>
 					<p class="meta">
 						{#if item.status === 'done'}
 							{t(lang, 'result.before')}: {formatSize(lang, item.file.size)}
 							· {t(lang, 'result.after')}:
-							{formatSize(lang, item.outputs.reduce((s, o) => s + o.bytes.byteLength, 0))}
+							{formatSize(lang, total(item))}
+							{#if change(item) !== null}
+								<span class="pct" class:down={change(item)! < 0}>(<bdi>{pctText(lang, change(item)!)}</bdi>)</span>
+							{/if}
+							{#each item.outputs.filter((o) => o.note) as o}
+								<span class="note">· {t(lang, `note.${o.note!}`)}</span>
+							{/each}
 						{:else if item.status === 'error'}
 							<span role="alert">{t(lang, `err.${item.error ?? 'unknown'}`, { mb: maxMB })}</span>
 						{:else if item.status === 'waiting'}
@@ -62,17 +83,17 @@
 					{/if}
 				</div>
 				<div class="actions">
-					{#each item.outputs as out}
+					{#if item.outputs.length === 1}
 						<button
 							class="btn btn-primary"
 							type="button"
-							onclick={() => downloadFile(out)}
-							aria-label="{t(lang, 'result.download')} {out.name}"
+							onclick={() => downloadFile(item.outputs[0])}
+							aria-label="{t(lang, 'result.download')} {item.outputs[0].name}"
 						>
 							<Icon name="download" />
 							{t(lang, 'result.download')}
 						</button>
-					{/each}
+					{/if}
 					{#if onremove && item.status !== 'working'}
 						<button
 							class="remove"
@@ -84,6 +105,19 @@
 						</button>
 					{/if}
 				</div>
+				{#if item.outputs.length > 1}
+					<ul class="files">
+						{#each item.outputs as out (out.name)}
+							<li>
+								<button type="button" onclick={() => downloadFile(out)} aria-label="{t(lang, 'result.download')} {out.name}">
+									<Icon name="download" size={16} />
+									<span dir="ltr">{out.name}</span>
+									<span class="size">{formatSize(lang, out.bytes.byteLength)}</span>
+								</button>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</li>
 		{/each}
 	</ul>
@@ -150,6 +184,43 @@
 		display: flex;
 		gap: var(--space-2);
 		align-items: center;
+	}
+	.pct {
+		font-weight: 700;
+	}
+	.pct.down {
+		color: var(--ok);
+	}
+	.note {
+		color: var(--accent-strong);
+	}
+	.files {
+		flex-basis: 100%;
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+	.files li {
+		display: contents;
+	}
+	.files button {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-height: var(--tap);
+		padding: 0 var(--space-3);
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		background: var(--bg);
+		color: var(--text);
+		font-size: 0.85rem;
+		cursor: pointer;
+	}
+	.files button:hover {
+		border-color: var(--accent);
+	}
+	.files .size {
+		color: var(--muted);
 	}
 	.remove {
 		display: grid;
