@@ -76,6 +76,27 @@ describe('Excel → other formats', () => {
 	});
 });
 
+describe('safety of the generated files', () => {
+	const sheet = (rows: string[][]) => {
+		const body = rows.map((r) => r.join(',')).join('\n') + '\n';
+		return { name: 's.csv', type: '', bytes: new TextEncoder().encode(body) } satisfies FileData;
+	};
+
+	it('CSV: cells that Excel would run as formulas are defused; numbers are not', async () => {
+		const src = sheet([['a', 'b', 'c', 'd', 'e'], ['=HYPERLINK("http://x")', '+cmd', '@SUM(A1)', '-2+3+cmd', '-42']]);
+		const [csv] = await convert.convert(src, { to: 'csv', bom: false });
+		expect(text(csv).split('\n')[1]).toBe(`"'=HYPERLINK(""http://x"")",'+cmd,'@SUM(A1),'-2+3+cmd,-42`);
+	});
+
+	it('SQL: quotes in values and names cannot break out; MySQL also escapes backslashes', async () => {
+		const src = sheet([['na"me', 'x'], ["O'Brien\\", '1']]);
+		const [std] = await convert.convert(src, { to: 'sql', table: 'a"; DROP TABLE x; --', create: false });
+		expect(text(std).trim()).toBe(`INSERT INTO "a_DROP_TABLE_x" ("na_me", "x") VALUES ('O''Brien\\', 1);`);
+		const [my] = await convert.convert(src, { to: 'sql', table: 't', create: false, dialect: 'mysql' });
+		expect(text(my).trim()).toBe("INSERT INTO `t` (`na_me`, `x`) VALUES ('O''Brien\\\\', 1);");
+	});
+});
+
 describe('JSON ↔ YAML ↔ XML ↔ TOML', () => {
 	it('round-trips the same data through every format', async () => {
 		const [yaml] = await format.convert(fx('sample.json'), { to: 'yaml' });

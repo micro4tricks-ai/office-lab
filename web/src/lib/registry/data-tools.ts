@@ -83,6 +83,16 @@ export const dataTools: Tool[] = [
 		['sql', 'insert', 'database'],
 		[
 			{ id: 'table', type: 'text', label: { ar: 'اسم الجدول (فارغ = اسم الورقة)', en: 'Table name (empty = sheet name)' }, default: '' },
+			{
+				id: 'dialect',
+				type: 'select',
+				label: { ar: 'قاعدة البيانات', en: 'Database' },
+				default: 'standard',
+				choices: [
+					{ value: 'standard', label: { ar: 'PostgreSQL / SQLite / SQL Server', en: 'PostgreSQL / SQLite / SQL Server' } },
+					{ value: 'mysql', label: { ar: 'MySQL / MariaDB', en: 'MySQL / MariaDB' } }
+				]
+			},
 			{ id: 'create', type: 'checkbox', label: { ar: 'إضافة CREATE TABLE', en: 'Include CREATE TABLE' }, default: true }
 		]
 	),

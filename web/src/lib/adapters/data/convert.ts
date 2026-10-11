@@ -24,25 +24,48 @@ ${body.map((r) => `<tr>${head.map((_, i) => `<td dir="auto">${esc(cell(r[i]))}</
 `;
 }
 
-/** SQL identifier from free text: Arabic letters allowed, everything else becomes "_". */
-const ident = (s: string, i: number) => {
+/**
+ * SQL identifier from free text: letters (Arabic too), digits and "_" only, so a header or
+ * table name can never break out of its quotes.
+ */
+const ident = (s: string, i: number, mysql: boolean) => {
 	const id = s.trim().replace(/[^\p{L}\p{N}_]+/gu, '_').replace(/^_+|_+$/g, '');
-	return `"${id || 'column_' + (i + 1)}"`;
+	const q = mysql ? '`' : '"';
+	return `${q}${id || 'column_' + (i + 1)}${q}`;
 };
-function sql(rows: unknown[][], table: string, create: boolean) {
+function sql(rows: unknown[][], table: string, create: boolean, mysql: boolean) {
 	if (!rows.length) return '';
 	const [head, ...body] = rows;
-	const cols = head.map((h, i) => ident(cell(h), i));
-	const name = ident(table || 'data', 0);
+	const cols = head.map((h, i) => ident(cell(h), i, mysql));
+	const name = ident(table || 'data', 0, mysql);
 	const value = (v: unknown) => {
 		const s = cell(v);
 		if (s === '') return 'NULL';
 		if (/^-?\d+(\.\d+)?$/.test(s) && !/^0\d/.test(s)) return s;
-		return `'${s.replace(/'/g, "''")}'`;
+		// Standard SQL escapes only quotes; MySQL also treats backslash as an escape.
+		const body = mysql ? s.replace(/\\/g, '\\\\').replace(/'/g, "''") : s.replace(/'/g, "''");
+		return `'${body}'`;
 	};
 	const out = create ? [`CREATE TABLE ${name} (\n  ${cols.map((c) => `${c} TEXT`).join(',\n  ')}\n);`] : [];
 	for (const r of body) out.push(`INSERT INTO ${name} (${cols.join(', ')}) VALUES (${cols.map((_, i) => value(r[i])).join(', ')});`);
 	return out.join('\n') + '\n';
+}
+
+/**
+ * CSV injection guard: a text cell starting with = + @ or a non-number "-" would run as a
+ * formula when the CSV is opened in Excel. Such cells get a leading apostrophe; real
+ * numbers (including negatives) are left alone.
+ */
+export function defuseFormulas(ws: import('xlsx').WorkSheet) {
+	for (const [ref, c] of Object.entries(ws)) {
+		if (ref.startsWith('!') || c.t !== 's') continue;
+		const v = String(c.v);
+		if (/^[=+@\t\r]/.test(v) || (v.startsWith('-') && !/^-\d+(\.\d+)?$/.test(v))) {
+			// sheet_to_csv prints the formatted text (w), so change both.
+			c.v = c.w = "'" + v;
+			delete c.f;
+		}
+	}
 }
 
 /** Spreadsheets (xlsx/xls/ods/csv/JSON) → CSV, JSON, HTML, Markdown, SQL or Excel. */
@@ -67,6 +90,7 @@ const adapter: Adapter = {
 			const file = (ext: string) => sheetFileName(input.name, name, many, ext);
 			if (to === 'csv') {
 				const sep = options.delimiter === 'semicolon' ? ';' : options.delimiter === 'tab' ? '\t' : ',';
+				defuseFormulas(ws);
 				out.push(textFile(file('csv'), 'text/csv;charset=utf-8', X.utils.sheet_to_csv(ws, { FS: sep, blankrows: false }), options.bom !== false));
 			} else if (to === 'json') {
 				const rows = X.utils.sheet_to_json(ws, { defval: null, raw: true });
@@ -75,7 +99,7 @@ const adapter: Adapter = {
 				const rows = await rowsOf(ws);
 				if (to === 'html') out.push(textFile(file('html'), 'text/html', html(rows, name)));
 				else if (to === 'md') out.push(textFile(file('md'), 'text/markdown', markdown(rows)));
-				else if (to === 'sql') out.push(textFile(file('sql'), 'application/sql', sql(rows, String(options.table || name), options.create !== false)));
+				else if (to === 'sql') out.push(textFile(file('sql'), 'application/sql', sql(rows, String(options.table || name), options.create !== false, options.dialect === 'mysql')));
 			}
 		}
 		return out;
