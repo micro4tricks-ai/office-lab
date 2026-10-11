@@ -79,14 +79,18 @@ export function createRunner() {
 		}
 	}
 
-	/** Runs one engine on bytes already in memory. */
-	function runData(engine: string, input: FileData, options: Options, progress?: (r: number) => void) {
-		const req: WorkerRequest = { id: ++seq, engine, file: input, options };
+	/** Runs one engine on bytes already in memory (several inputs only for `combine`). */
+	function runData(engine: string, input: FileData | FileData[], options: Options, progress?: (r: number) => void) {
+		const files = Array.isArray(input) ? input : [input];
+		const req: WorkerRequest = { id: ++seq, engine, files, combine: Array.isArray(input), options };
+		const transfer = [...new Set(files.map((f) => f.bytes.buffer as ArrayBuffer))];
 		return new Promise<FileData[]>((resolve, reject) => {
-			queue.push({ req, transfer: [input.bytes.buffer], resolve, reject, progress });
+			queue.push({ req, transfer, resolve, reject, progress });
 			pump();
 		});
 	}
+
+	const mergedOptions = (tool: Tool, options: Options) => ({ ...tool.params, ...($state.snapshot(options) as Options) });
 
 	/** Runs a tool on a picked file: prepares it (SVG → PNG), merges fixed params under the user's options. */
 	async function run(tool: Tool, file: File, options: Options, progress?: (r: number) => void) {
@@ -96,7 +100,18 @@ export function createRunner() {
 		} catch {
 			throw new ConvertError('corrupted');
 		}
-		return runData(tool.engine, input, { ...tool.params, ...($state.snapshot(options) as Options) }, progress);
+		return runData(tool.engine, input, mergedOptions(tool, options), progress);
+	}
+
+	/** Runs a `combine` tool on all files at once, in the given order. */
+	async function runAll(tool: Tool, files: File[], options: Options, progress?: (r: number) => void) {
+		let inputs: FileData[];
+		try {
+			inputs = await Promise.all(files.map(prepare));
+		} catch {
+			throw new ConvertError('corrupted');
+		}
+		return runData(tool.engine, inputs, mergedOptions(tool, options), progress);
 	}
 
 	function dispose() {
@@ -108,5 +123,5 @@ export function createRunner() {
 		created = 0;
 	}
 
-	return { run, runData, dispose, size };
+	return { run, runAll, runData, dispose, size };
 }

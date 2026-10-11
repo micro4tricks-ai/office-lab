@@ -1,9 +1,11 @@
 import { inWorker } from '../workers/proxy';
 import { imageTools } from './image-tools';
+import { pdfTools } from './pdf-tools';
 import type { Tool } from './types';
 
 /** Single source of truth: UI, routes, SEO pages and capability checks come from here. */
 export const tools: Tool[] = [
+	...pdfTools,
 	...imageTools,
 	{
 		id: 'txt-to-html',

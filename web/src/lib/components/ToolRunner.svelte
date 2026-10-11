@@ -21,6 +21,7 @@
 		untrack(() => Object.fromEntries((tool.options ?? []).map((o) => [o.id, o.default])))
 	);
 	let missing = $state<string | null>(null);
+	let countError = $state(false);
 
 	const pending = $derived(items.some((i) => i.status === 'waiting'));
 	const finished = $derived(items.length > 0 && items.every((i) => i.status === 'done' || i.status === 'error'));
@@ -49,19 +50,60 @@
 		options[id] = file ? ((await prepare(file)) as FileData) : null;
 	}
 
+	/** Unexpected failures go to the console so a bug report can include them. */
+	function errorCode(e: unknown) {
+		const code = e instanceof ConvertError ? e.code : 'unknown';
+		if (code === 'unknown') console.error(`[office-lab] ${tool.id}:`, e);
+		return code;
+	}
+
 	async function runOne(item: Item) {
 		item.status = 'working';
 		try {
-			item.outputs = await runner.run(tool, item.file, options, (r) => (item.progress = r));
+			item.outputs = await runner.run(tool, item.file, { ...options, lang }, (r) => (item.progress = r));
 			item.status = 'done';
 		} catch (e) {
 			item.status = 'error';
-			item.error = e instanceof ConvertError ? e.code : 'unknown';
+			item.error = errorCode(e);
+		}
+	}
+
+	function move(id: number, by: -1 | 1) {
+		const i = items.findIndex((x) => x.id === id);
+		const j = i + by;
+		if (i < 0 || j < 0 || j >= items.length) return;
+		[items[i], items[j]] = [items[j], items[i]];
+	}
+
+	/** Combine tools: every waiting file goes into one job; its result replaces the list. */
+	async function convertCombined(min: number, max = Infinity) {
+		const inputs = items.filter((i) => i.status === 'waiting');
+		countError = inputs.length < min || inputs.length > max;
+		if (countError) return;
+		const job: Item = {
+			id: ++seq,
+			file: inputs[0].file,
+			label: t(lang, 'result.combined', { n: inputs.length }),
+			inputSize: inputs.reduce((s, i) => s + i.file.size, 0),
+			status: 'working',
+			progress: 0,
+			outputs: []
+		};
+		items = [job];
+		const row = items[0];
+		try {
+			row.outputs = await runner.runAll(tool, inputs.map((i) => i.file), { ...options, lang }, (r) => (row.progress = r));
+			row.status = 'done';
+		} catch (e) {
+			row.status = 'error';
+			row.error = errorCode(e);
 		}
 	}
 
 	async function convert() {
-		const need = visible.find((o) => o.type === 'image' && !options[o.id]);
+		const need = visible.find(
+			(o) => (o.type === 'image' || (o.type === 'text' && o.required)) && !String(options[o.id] ?? '').trim()
+		);
 		if (need) {
 			missing = need.id;
 			document.getElementById(`opt-${need.id}`)?.focus();
@@ -69,6 +111,11 @@
 		}
 		missing = null;
 		busy = true;
+		if (tool.combine) {
+			await convertCombined(tool.combine.min, tool.combine.max);
+			busy = false;
+			return;
+		}
 		// The runner queues these and runs as many at once as it has workers.
 		await Promise.all(items.filter((i) => i.status === 'waiting').map(runOne));
 		busy = false;
@@ -114,7 +161,19 @@
 									{/each}
 								</select>
 							{:else if opt.type === 'text'}
-								<input id="opt-{opt.id}" type="text" dir="auto" bind:value={options[opt.id]} />
+								<input
+									id="opt-{opt.id}"
+									type={opt.secret ? 'password' : 'text'}
+									dir="auto"
+									autocomplete={opt.secret ? 'off' : undefined}
+									placeholder={opt.placeholder?.[lang]}
+									aria-invalid={missing === opt.id}
+									aria-describedby={missing === opt.id ? `err-${opt.id}` : undefined}
+									bind:value={options[opt.id]}
+								/>
+								{#if missing === opt.id}
+									<span id="err-{opt.id}" class="err" role="alert">{t(lang, 'tool.needValue')}</span>
+								{/if}
 							{:else if opt.type === 'color'}
 								<input id="opt-{opt.id}" type="color" bind:value={options[opt.id]} />
 							{:else if opt.type === 'image'}
@@ -158,7 +217,18 @@
 			</fieldset>
 		{/if}
 
-		<ResultList {lang} {items} maxMB={tool.maxMB} onremove={busy ? undefined : (id) => (items = items.filter((i) => i.id !== id))} />
+		{#if tool.combine && pending}
+			<p class="hint" class:err={countError} role={countError ? 'alert' : undefined}>
+				{t(lang, 'tool.combineHint', { n: tool.combine.min })}
+			</p>
+		{/if}
+		<ResultList
+			{lang}
+			{items}
+			maxMB={tool.maxMB}
+			onremove={busy ? undefined : (id) => (items = items.filter((i) => i.id !== id))}
+			onmove={tool.combine && !busy ? move : undefined}
+		/>
 
 		<div class="bar">
 			{#if pending || busy}
@@ -274,6 +344,11 @@
 	.err {
 		color: var(--danger);
 		font-size: 0.875rem;
+	}
+	.hint {
+		color: var(--muted);
+		font-size: 0.9rem;
+		margin: 0;
 	}
 	.bar {
 		display: flex;

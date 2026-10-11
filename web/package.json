@@ -4,6 +4,8 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
+		"predev": "node scripts/copy-assets.mjs",
+		"prebuild": "node scripts/copy-assets.mjs",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
@@ -40,9 +42,11 @@
 		"@jsquash/oxipng": "^2.3.0",
 		"@jsquash/png": "^3.1.1",
 		"@jsquash/webp": "^1.5.0",
+		"diff": "^9.0.0",
 		"fflate": "^0.8.3",
 		"imagetracerjs": "^1.2.6",
 		"libheif-js": "^1.23.5",
+		"pdfjs-dist": "^6.4.299",
 		"utif2": "^4.1.0"
 	},
 	"license": "AGPL-3.0-only"

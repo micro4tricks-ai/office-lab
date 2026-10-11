@@ -17,3 +17,8 @@ declare module 'imagetracerjs' {
 	};
 	export default ImageTracer;
 }
+
+// pdf.js's worker entry, loaded into our own worker as its "fake worker".
+declare module 'pdfjs-dist/build/pdf.worker.mjs' {
+	export const WorkerMessageHandler: unknown;
+}

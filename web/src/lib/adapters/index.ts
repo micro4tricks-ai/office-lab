@@ -12,5 +12,19 @@ export const engines: Record<string, () => Promise<Adapter>> = {
 	'image-strip': lazy(() => import('./image/strip')),
 	'image-watermark': lazy(() => import('./image/watermark')),
 	'image-favicon': lazy(() => import('./image/favicon')),
-	'image-trace': lazy(() => import('./image/trace'))
+	'image-trace': lazy(() => import('./image/trace')),
+	'pdf-merge': lazy(() => import('./pdf/merge')),
+	'pdf-split': lazy(() => import('./pdf/split')),
+	'pdf-pages': lazy(() => import('./pdf/pages-op')),
+	'pdf-crop': lazy(() => import('./pdf/crop')),
+	'pdf-security': lazy(() => import('./pdf/security')),
+	'pdf-metadata': lazy(() => import('./pdf/metadata')),
+	'pdf-from-images': lazy(() => import('./pdf/from-images')),
+	'pdf-render': lazy(() => import('./pdf/render')),
+	'pdf-text': lazy(() => import('./pdf/text')),
+	'pdf-images': lazy(() => import('./pdf/extract-images')),
+	'pdf-compare': lazy(() => import('./pdf/compare')),
+	'pdf-page-numbers': lazy(() => import('./pdf/page-numbers')),
+	'pdf-watermark': lazy(() => import('./pdf/watermark')),
+	'pdf-compress': lazy(() => import('./pdf/compress'))
 };

@@ -41,7 +41,7 @@
 	"result.waiting": "Waiting",
 	"err.wrong-type": "This file type isn't supported by this tool.",
 	"err.too-big": "The file is larger than the limit ({mb} MB).",
-	"err.password": "The file is password-protected.",
+	"err.password": "The file is password-protected — enter the right password in the “Unlock PDF” tool.",
 	"err.corrupted": "The file is damaged or can't be read.",
 	"err.unknown": "Something went wrong during conversion.",
 	"footer.oss": "Open-source project",
@@ -52,5 +52,13 @@
 	"note.metadata-removed": "Metadata (EXIF/location) removed",
 	"note.no-metadata": "It had no hidden metadata",
 	"note.orientation-applied": "Metadata removed and rotation applied",
-	"note.target-missed": "Could not reach the target; this is the smallest possible"
+	"note.target-missed": "Could not reach the target; this is the smallest possible",
+	"drop.up": "Move {name} up",
+	"drop.down": "Move {name} down",
+	"result.combined": "{n} files in one",
+	"tool.combineHint": "Use the arrows to set the order — files are combined in this order (at least {n}).",
+	"note.identical": "The two files have the same text",
+	"err.pages": "Those page numbers don't fit this file. Write them like: 1-3, 5, 8-",
+	"err.nothing": "Nothing to extract from this file (if it is a scan, it needs OCR).",
+	"tool.needValue": "This field is required."
 }
