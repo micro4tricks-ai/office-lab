@@ -22,6 +22,7 @@
 	import Icon from './Icon.svelte';
 	import ProgressBar from './ProgressBar.svelte';
 	import Thumb from './Thumb.svelte';
+	import CopyButton from '../widgets/CopyButton.svelte';
 
 	let {
 		lang,
@@ -42,6 +43,12 @@
 	const total = (i: Item) => i.outputs.reduce((s, o) => s + o.bytes.byteLength, 0);
 	const before = (i: Item) => i.inputSize ?? i.file.size;
 	const preview = (i: Item) => i.outputs.find((o) => o.type.startsWith('image/'));
+	/** A single plain-text result (OCR, PDF → text) is shown right here, ready to copy. */
+	function textOf(i: Item) {
+		const o = i.outputs.length === 1 ? i.outputs[0] : null;
+		if (!o || !o.type.startsWith('text/plain') || o.bytes.byteLength > 200_000) return null;
+		return new TextDecoder().decode(o.bytes).trim();
+	}
 	/** −42% / +8%, only when one file came out of one file. */
 	function change(i: Item) {
 		if (i.outputs.length !== 1 || !before(i)) return null;
@@ -127,6 +134,13 @@
 						</button>
 					{/if}
 				</div>
+				{#if item.status === 'done' && textOf(item)}
+					{@const text = textOf(item)!}
+					<div class="text-out">
+						<textarea readonly dir="auto" rows={Math.min(14, Math.max(4, text.split('\n').length + 1))} aria-label={t(lang, 'result.text')} data-testid="result-text">{text}</textarea>
+						<CopyButton {lang} {text} />
+					</div>
+				{/if}
 				{#if item.outputs.length > 1}
 					<ul class="files">
 						{#each item.outputs as out (out.name)}
@@ -215,6 +229,23 @@
 	}
 	.note {
 		color: var(--accent-strong);
+	}
+	.text-out {
+		flex-basis: 100%;
+		display: grid;
+		gap: var(--space-2);
+		justify-items: start;
+	}
+	.text-out textarea {
+		width: 100%;
+		resize: vertical;
+		padding: var(--space-3);
+		font: inherit;
+		line-height: 1.8;
+		color: var(--text);
+		background: var(--bg);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
 	}
 	.files {
 		flex-basis: 100%;

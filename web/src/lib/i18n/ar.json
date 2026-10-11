@@ -211,5 +211,6 @@
 	"w.web.preview": "معاينة اللقطة",
 	"w.web.badUrl": "لا يمكن فتح هذا الرابط. اكتب رابط صفحة عامة على الإنترنت مثل https://example.com",
 	"md.direct": "تحميل PDF مباشرة",
-	"md.directBusy": "جارٍ تجهيز PDF…"
+	"md.directBusy": "جارٍ تجهيز PDF…",
+	"result.text": "النص المستخرج"
 }

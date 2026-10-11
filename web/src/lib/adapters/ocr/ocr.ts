@@ -9,6 +9,7 @@ import { loadPdf, pdfLib, savePdf } from '../pdf/lib';
 import { toUser, visualSize } from '../pdf/place';
 import { openPdf } from '../pdf/pdfjs';
 import { renderPage } from '../pdf/render';
+import { grayToRgba, prepareForOcr, toOriginal } from './prepare';
 
 /** Scanned PDFs are capped in the browser (each page is a full OCR run). */
 export const MAX_PAGES = 20;
@@ -42,14 +43,17 @@ async function makeWorker(langs: string, progress: (r: number) => void) {
 
 type TWorker = Awaited<ReturnType<typeof makeWorker>>;
 
-async function recognise(worker: TWorker, png: Uint8Array, width: number, height: number): Promise<PageResult> {
+/** Evens the light and straightens the page first (see prepare.ts); word boxes come back in the original's pixels. */
+async function recognise(worker: TWorker, image: ImageData): Promise<PageResult> {
+	const prep = prepareForOcr(image.data, image.width, image.height);
+	const png = await encodePng(new ImageData(grayToRgba(prep.gray), prep.width, prep.height), false);
 	const { data } = await worker.recognize(new Blob([png as Uint8Array<ArrayBuffer>], { type: 'image/png' }), {}, { text: true, blocks: true });
 	const words: Word[] = [];
 	for (const b of data.blocks ?? [])
 		for (const p of b.paragraphs)
 			for (const l of p.lines)
-				for (const w of l.words) if (w.text.trim()) words.push({ text: w.text, ...w.bbox });
-	return { text: data.text.trim(), words, width, height };
+				for (const w of l.words) if (w.text.trim()) words.push({ text: w.text, ...toOriginal(prep, w.bbox) });
+	return { text: data.text.trim(), words, width: image.width, height: image.height };
 }
 
 const isArabic = (s: string) => /[؀-ۿ]/.test(s);
@@ -103,6 +107,8 @@ const adapter: Adapter = {
 		let done = 0;
 		let total = 1;
 		const worker = await makeWorker(langs, (r) => progress?.((done + r) / total));
+		// 6 = one block of text (letters, invoices, tables: far better on photos); 3 = automatic layout (columns).
+		await worker.setParameters({ tessedit_pageseg_mode: (options.layout === 'columns' ? '3' : '6') as never });
 		try {
 			if (isPdf) {
 				const pdf = await openPdf(input);
@@ -110,14 +116,14 @@ const adapter: Adapter = {
 				limited = pdf.numPages > MAX_PAGES;
 				for (let n = 1; n <= total; n++) {
 					const img = await renderPage(pdf, n, DPI / 72);
-					pages.push(await recognise(worker, await encodePng(img, false), img.width, img.height));
+					pages.push(await recognise(worker, img));
 					done = n;
 				}
 				await pdf.loadingTask.destroy();
 			} else {
 				if (!sniff(input.bytes)) throw new ConvertError('wrong-type');
 				const { image } = await decodeImage(input);
-				pages.push(await recognise(worker, await encodePng(image, false), image.width, image.height));
+				pages.push(await recognise(worker, image));
 			}
 		} finally {
 			await worker.terminate();

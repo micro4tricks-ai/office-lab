@@ -211,5 +211,6 @@
 	"w.web.preview": "Screenshot preview",
 	"w.web.badUrl": "This address can't be opened. Enter a public web page such as https://example.com",
 	"md.direct": "Download PDF",
-	"md.directBusy": "Making the PDF…"
+	"md.directBusy": "Making the PDF…",
+	"result.text": "Extracted text"
 }
