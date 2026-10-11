@@ -1,4 +1,5 @@
 import type { FileData } from './registry/types';
+import { safeEntryName } from './zip-names';
 
 function save(blob: Blob, name: string) {
 	const url = URL.createObjectURL(blob);
@@ -19,8 +20,10 @@ export async function downloadZip(files: FileData[], name = 'office-lab.zip') {
 	const { zipSync } = await import('fflate');
 	const entries: Record<string, Uint8Array> = {};
 	for (const f of files) {
-		let n = f.name;
-		for (let i = 2; n in entries; i++) n = f.name.replace(/(\.[^.]+)?$/, ` (${i})$1`);
+		// Names can come from inside user files: keep every entry inside the archive.
+		const safe = safeEntryName(f.name);
+		let n = safe;
+		for (let i = 2; n in entries; i++) n = safe.replace(/(\.[^./]+)?$/, ` (${i})$1`);
 		entries[n] = f.bytes;
 	}
 	save(new Blob([zipSync(entries, { level: 6 }) as Uint8Array<ArrayBuffer>], { type: 'application/zip' }), name);

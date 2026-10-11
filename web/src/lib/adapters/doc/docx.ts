@@ -1,7 +1,12 @@
 import { ConvertError, type Adapter, type FileData } from '../../registry/types';
 
 const hasArabic = (s: string) => /[؀-ۿ]/.test(s);
-const base = (name: string) => name.replace(/\.[^.]+$/, '');
+/** File name without extension, and without anything that could act as a path. */
+const base = (name: string) =>
+	name
+		.replace(/\.[^.]+$/, '')
+		.replace(/[\\/:*?"<>|]+/g, '_')
+		.replace(/^\.+/, '') || 'document';
 
 type Image = { name: string; type: string; bytes: Uint8Array };
 
@@ -12,7 +17,9 @@ async function toHtml(input: FileData, inlineImages: boolean, folder: string) {
 	const convertImage = inlineImages
 		? undefined
 		: mammoth.images.imgElement(async (img) => {
-				const ext = (img.contentType.split('/')[1] ?? 'png').replace('jpeg', 'jpg');
+				// The content type comes from inside the file: never let it shape a path.
+				const sub = (img.contentType.split('/')[1] ?? '').toLowerCase().replace('jpeg', 'jpg');
+				const ext = /^[a-z0-9]{1,5}$/.test(sub) ? sub : 'bin';
 				const name = `${folder}/image-${images.length + 1}.${ext}`;
 				images.push({ name, type: img.contentType, bytes: new Uint8Array(await img.readAsArrayBuffer()) });
 				return { src: name };
