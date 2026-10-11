@@ -132,5 +132,6 @@
 	"md.edit": "Write",
 	"md.preview": "Preview",
 	"md.paged": "Paged preview",
-	"md.hint": "What you write is saved on your device automatically. For a PDF: press “Print / Save as PDF” and pick “Save as PDF” in the print dialog."
+	"md.hint": "What you write is saved on your device automatically. For a PDF: press “Print / Save as PDF” and pick “Save as PDF” in the print dialog.",
+	"note.ocr-limit": "Only the first 20 pages were read in the browser; use the server version for longer files."
 }

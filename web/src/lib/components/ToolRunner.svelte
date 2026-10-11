@@ -71,7 +71,7 @@
 	async function runOne(item: Item) {
 		item.status = 'working';
 		try {
-			item.outputs = await runner.run(tool, item.file, { ...options, lang }, (r) => (item.progress = r));
+			item.outputs = await runner.run(tool, item.file, { ...options, uiLang: lang }, (r) => (item.progress = r));
 			item.status = 'done';
 		} catch (e) {
 			item.status = 'error';
@@ -103,7 +103,7 @@
 		items = [job];
 		const row = items[0];
 		try {
-			row.outputs = await runner.runAll(tool, inputs.map((i) => i.file), { ...options, lang }, (r) => (row.progress = r));
+			row.outputs = await runner.runAll(tool, inputs.map((i) => i.file), { ...options, uiLang: lang }, (r) => (row.progress = r));
 			row.status = 'done';
 		} catch (e) {
 			row.status = 'error';

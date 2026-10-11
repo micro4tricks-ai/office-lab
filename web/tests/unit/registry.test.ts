@@ -36,6 +36,11 @@ describe('registry', () => {
 		}
 	});
 
+	it('no option shadows a key the runner adds itself (uiLang)', () => {
+		for (const t of tools) for (const o of t.options ?? []) expect(o.id, t.id).not.toBe('uiLang');
+		for (const t of tools) expect(Object.keys(t.params ?? {}), t.id).not.toContain('uiLang');
+	});
+
 	it('conditional options point at a real option', () => {
 		for (const t of tools) {
 			const ids = new Set((t.options ?? []).map((o) => o.id));

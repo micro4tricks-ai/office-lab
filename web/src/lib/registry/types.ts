@@ -14,7 +14,8 @@ export type NoteKey =
 	| 'no-metadata'
 	| 'orientation-applied'
 	| 'target-missed'
-	| 'identical';
+	| 'identical'
+	| 'ocr-limit';
 
 export type ErrorCode = 'wrong-type' | 'too-big' | 'password' | 'corrupted' | 'pages' | 'nothing' | 'unknown';
 

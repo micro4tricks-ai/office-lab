@@ -142,7 +142,7 @@ const adapter: Adapter = {
 			return [out];
 		}
 		const rendered = await renderMarkdown(src);
-		const lang = options.lang === 'en' ? 'en' : 'ar';
+		const lang = options.uiLang === 'en' ? 'en' : 'ar';
 		const html = buildDocument(rendered, { ...PAGE, toc: options.toc === true }, 'screen', lang, lang === 'ar' ? 'المحتويات' : 'Contents');
 		return [{ name: base(input.name) + '.html', type: 'text/html', bytes: new TextEncoder().encode(html) }];
 	}

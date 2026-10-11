@@ -2,6 +2,7 @@ import { inWorker } from '../workers/proxy';
 import { imageTools } from './image-tools';
 import { dataTools } from './data-tools';
 import { docTools } from './doc-tools';
+import { ocrTools } from './ocr-tools';
 import { pdfTools } from './pdf-tools';
 import type { Tool } from './types';
 
@@ -11,6 +12,7 @@ export const tools: Tool[] = [
 	...imageTools,
 	...dataTools,
 	...docTools,
+	...ocrTools,
 	{
 		id: 'txt-to-html',
 		category: 'document',

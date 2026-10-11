@@ -40,7 +40,7 @@ describe('renderMarkdown', () => {
 
 describe('Markdown → HTML / Word', () => {
 	it('HTML: a full page, right-to-left for Arabic, contents when asked', async () => {
-		const [html] = await markdown.convert(md('# عنوان\n\n## قسم\n\nنص'), { to: 'html', toc: true, lang: 'ar' });
+		const [html] = await markdown.convert(md('# عنوان\n\n## قسم\n\nنص'), { to: 'html', toc: true, uiLang: 'ar' });
 		const t = new TextDecoder().decode(html.bytes);
 		expect(html.name).toBe('note.html');
 		expect(t).toContain('<html lang="ar" dir="rtl">');
