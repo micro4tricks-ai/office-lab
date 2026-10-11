@@ -189,3 +189,121 @@ test('merging a 200-page PDF keeps the page responsive', async ({ page }, info) 
 	expect((await open((await grab(page)).bytes)).getPageCount()).toBe(203);
 	expect(longest).toBeLessThan(500);
 });
+
+/** All text on the pages, read with pdf.js (as a reader would see it). */
+async function pdfText(bytes: Buffer) {
+	const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
+	const doc = await getDocument({ data: new Uint8Array(bytes), verbosity: 0 }).promise;
+	let text = '';
+	for (let n = 1; n <= doc.numPages; n++) {
+		const content = await (await doc.getPage(n)).getTextContent();
+		text += content.items.map((i) => ('str' in i ? i.str : '')).join(' ') + '\n';
+	}
+	return text;
+}
+
+/** How many images each page draws (XObjects in its resources). */
+async function imagesPerPage(bytes: Buffer) {
+	const { PDFName, PDFDict } = await import('@cantoo/pdf-lib');
+	const doc = await open(bytes);
+	return doc.getPages().map((p) => {
+		const xo = p.node.Resources()?.lookup(PDFName.of('XObject'), PDFDict);
+		return xo ? xo.keys().length : 0;
+	});
+}
+
+test.describe('interactive pdf editors', () => {
+	test.describe.configure({ timeout: 120_000 });
+
+	test('organize: delete, reorder, rotate', async ({ page }) => {
+		await page.goto('en/organize-pdf/');
+		await page.getByTestId('file-input').setInputFiles(pdf('text3.pdf'));
+		await expect(page.getByTestId('page-card')).toHaveCount(3, { timeout: 30_000 });
+		await page.getByRole('button', { name: 'Delete Page 2' }).click();
+		await page.getByRole('button', { name: 'Move Page 3 earlier' }).click();
+		await page.getByRole('button', { name: 'Rotate Page 1 right' }).click();
+		await page.getByRole('button', { name: 'Convert', exact: true }).click();
+		const doc = await open((await grab(page)).bytes);
+		expect(doc.getPageCount()).toBe(2);
+		expect(doc.getPages().map((p) => p.getRotation().angle)).toEqual([0, 90]);
+	});
+
+	test('sign: draw, type in Ruqaa, date — and one on every page', async ({ page }) => {
+		await page.goto('ar/sign-pdf/');
+		await page.getByTestId('file-input').setInputFiles(pdf('text3.pdf'));
+		await expect(page.getByRole('img', { name: 'صفحة 1 من 3' })).toBeVisible({ timeout: 30_000 });
+
+		await page.getByRole('button', { name: 'ارسم التوقيع' }).click();
+		const pad = await page.getByTestId('sign-pad').boundingBox();
+		await page.mouse.move(pad!.x + 40, pad!.y + 60);
+		await page.mouse.down();
+		for (let i = 1; i <= 10; i++) await page.mouse.move(pad!.x + 40 + i * 25, pad!.y + 60 + (i % 2) * 30);
+		await page.mouse.up();
+		await page.getByRole('button', { name: 'إضافة للصفحة' }).click();
+
+		await page.getByRole('button', { name: 'اكتب التوقيع' }).click();
+		await page.getByLabel('اسمك').fill('أحمد علي');
+		await page.getByRole('button', { name: 'إضافة للصفحة' }).click();
+		await page.getByLabel('على كل الصفحات').check();
+
+		await page.getByRole('button', { name: 'تاريخ اليوم' }).click();
+		await expect(page.getByTestId('placed-item')).toHaveCount(3);
+
+		// Nudge the date with the keyboard.
+		await page.getByTestId('placed-item').last().press('ArrowUp');
+		await page.getByRole('button', { name: 'تحويل', exact: true }).click();
+		const dl = page.waitForEvent('download');
+		await page.getByRole('button', { name: /^تنزيل/ }).click();
+		const counts = await imagesPerPage(readFileSync((await (await dl).path())!));
+		expect(counts).toEqual([3, 1, 1]); // drawn + typed + date on page 1; typed on every page
+	});
+
+	test('fill a form in Arabic: flattened and editable', async ({ page }) => {
+		const fill = async (flatten: boolean) => {
+			await page.goto('en/fill-pdf-form/');
+			await page.getByTestId('file-input').setInputFiles(pdf('form.pdf'));
+			await page.getByLabel('name', { exact: true }).fill('أحمد علي');
+			await page.getByLabel('city', { exact: true }).fill('Cairo');
+			await page.getByLabel('agree').check();
+			await page.getByLabel('kind').selectOption('Visit');
+			if (!flatten) await page.getByLabel('Flatten (values can no longer be edited)').uncheck();
+			await page.getByRole('button', { name: 'Convert', exact: true }).click();
+			return (await grab(page)).bytes;
+		};
+		const flat = await fill(true);
+		expect((await open(flat)).getForm().getFields()).toHaveLength(0);
+		// Latin values become real text; the Arabic one is drawn as an image — never as "????".
+		const text = await pdfText(flat);
+		expect(text).toContain('Cairo');
+		expect(text).not.toContain('?');
+
+		const editable = await open(await fill(false));
+		const form = editable.getForm();
+		expect(form.getTextField('name').getText()).toBe('أحمد علي');
+		expect(form.getTextField('city').getText()).toBe('Cairo');
+		expect(form.getCheckBox('agree').isChecked()).toBe(true);
+		expect(form.getDropdown('kind').getSelected()).toEqual(['Visit']);
+	});
+
+	test('a PDF without a form says so', async ({ page }) => {
+		await page.goto('en/fill-pdf-form/');
+		await page.getByTestId('file-input').setInputFiles(pdf('text3.pdf'));
+		await expect(page.getByRole('alert')).toHaveText('This file has no fillable form fields.');
+	});
+
+	test('edit: Arabic text and an image', async ({ page }) => {
+		await page.goto('en/edit-pdf/');
+		await page.getByTestId('file-input').setInputFiles(pdf('text3.pdf'));
+		await expect(page.getByRole('img', { name: 'Page 1 of 3' })).toBeVisible({ timeout: 30_000 });
+		await page.getByRole('button', { name: 'Convert', exact: true }).click();
+		await expect(page.getByRole('alert')).toHaveText('Add at least one item first.');
+
+		await page.getByRole('button', { name: 'Text', exact: true }).click();
+		await page.getByLabel('Text', { exact: true }).fill('تمت المراجعة');
+		await page.getByRole('button', { name: 'Add to page' }).click();
+		await page.getByRole('button', { name: 'Next page' }).click();
+		await page.getByTestId('place-image').setInputFiles(fx('images/logo.svg'));
+		await page.getByRole('button', { name: 'Convert', exact: true }).click();
+		expect(await imagesPerPage((await grab(page)).bytes)).toEqual([1, 1, 0]);
+	});
+});

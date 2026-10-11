@@ -27,7 +27,16 @@ export class ConvertError extends Error {
 	}
 }
 
-export type OptionValue = string | number | boolean | FileData | null;
+/** One page in an organized PDF: which source page, and extra rotation. */
+export type PagePlan = { src: number; rotate: number };
+/**
+ * Something drawn on a page (signature, text, image), already as PNG. Position and size are
+ * fractions of the page as the reader sees it; (x, y) is the top-left corner.
+ */
+export type Placement = { page: number; x: number; y: number; w: number; h: number; png: FileData };
+export type FormValues = Record<string, string | boolean>;
+
+export type OptionValue = string | number | boolean | FileData | null | PagePlan[] | Placement[] | FormValues;
 export type Options = Record<string, OptionValue>;
 
 /** Every engine sits behind this, so any library can be swapped later. */
@@ -73,5 +82,7 @@ export type Tool = {
 	batch: boolean;
 	/** All files become ONE job (order matters, user can reorder). */
 	combine?: { min: number; max?: number };
+	/** An interactive step before converting; it writes options.plan / .items / .fields. */
+	editor?: 'organize' | 'place' | 'form';
 	i18n: Record<Lang, ToolText>;
 };

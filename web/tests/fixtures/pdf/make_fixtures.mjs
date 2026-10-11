@@ -33,4 +33,19 @@ const jpg = await photo.embedJpg(readFileSync(new URL('photo-src.jpg', here)));
 photo.addPage([720, 540]).drawImage(jpg, { x: 0, y: 0, width: 720, height: 540 });
 out('photo.pdf', await photo.save());
 
+const formDoc = await PDFDocument.create();
+const formFont = await formDoc.embedFont(StandardFonts.Helvetica);
+const fp = formDoc.addPage([595, 842]);
+const form = formDoc.getForm();
+fp.drawText('Request form', { x: 60, y: 770, size: 22, font: formFont });
+[['Name', 700], ['City', 650]].forEach(([label, y]) => fp.drawText(label, { x: 60, y: y + 8, size: 12, font: formFont }));
+form.createTextField('name').addToPage(fp, { x: 140, y: 695, width: 300, height: 26 });
+form.createTextField('city').addToPage(fp, { x: 140, y: 645, width: 300, height: 26 });
+fp.drawText('I agree', { x: 90, y: 605, size: 12, font: formFont });
+form.createCheckBox('agree').addToPage(fp, { x: 60, y: 600, width: 18, height: 18 });
+const kind = form.createDropdown('kind');
+kind.addOptions(['Contract', 'Visit', 'Report']);
+kind.addToPage(fp, { x: 140, y: 555, width: 200, height: 26 });
+out('form.pdf', await formDoc.save());
+
 console.log('PDF fixtures written');

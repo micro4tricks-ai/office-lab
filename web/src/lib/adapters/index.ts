@@ -26,5 +26,9 @@ export const engines: Record<string, () => Promise<Adapter>> = {
 	'pdf-compare': lazy(() => import('./pdf/compare')),
 	'pdf-page-numbers': lazy(() => import('./pdf/page-numbers')),
 	'pdf-watermark': lazy(() => import('./pdf/watermark')),
-	'pdf-compress': lazy(() => import('./pdf/compress'))
+	'pdf-compress': lazy(() => import('./pdf/compress')),
+	'pdf-thumbs': lazy(() => import('./pdf/thumbs')),
+	'pdf-organize': lazy(() => import('./pdf/organize')),
+	'pdf-place': lazy(() => import('./pdf/placements')),
+	'pdf-forms': lazy(() => import('./pdf/forms'))
 };

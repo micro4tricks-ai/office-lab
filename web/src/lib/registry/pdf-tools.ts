@@ -49,6 +49,54 @@ export const pdfTools: Tool[] = [
 		}
 	}),
 	pdf({
+		id: 'organize-pdf',
+		to: ['pdf'],
+		engine: 'pdf-organize',
+		batch: false,
+		editor: 'organize',
+		i18n: {
+			ar: { title: 'ترتيب صفحات PDF', desc: 'شاهد كل الصفحات: اسحبها لترتيبها، ودوّر أو احذف ما تريد.', keywords: ['ترتيب', 'organize', 'إعادة ترتيب', 'حذف صفحات'] },
+			en: { title: 'Organize PDF', desc: 'See every page: drag to reorder, rotate or delete what you want.', keywords: ['organize', 'reorder', 'arrange', 'sort pages'] }
+		}
+	}),
+	pdf({
+		id: 'sign-pdf',
+		to: ['pdf'],
+		engine: 'pdf-place',
+		batch: false,
+		editor: 'place',
+		params: { mode: 'sign' },
+		i18n: {
+			ar: { title: 'توقيع PDF', desc: 'وقّع المستند بالرسم أو بكتابة اسمك بخط الرقعة أو بصورة توقيعك أو ختمك، وضعه حيث تريد.', keywords: ['توقيع', 'sign', 'إمضاء', 'ختم'] },
+			en: { title: 'Sign PDF', desc: 'Sign by drawing, typing your name, or with an image of your signature or stamp — placed where you want.', keywords: ['sign', 'signature', 'e-sign', 'stamp'] }
+		}
+	}),
+	pdf({
+		id: 'edit-pdf',
+		to: ['pdf'],
+		engine: 'pdf-place',
+		batch: false,
+		editor: 'place',
+		params: { mode: 'annotate' },
+		i18n: {
+			ar: { title: 'إضافة نص أو صورة إلى PDF', desc: 'اكتب نصًا عربيًا أو إنجليزيًا أو ضع صورة في أي مكان على الصفحات.', keywords: ['إضافة نص', 'تعديل pdf', 'add text', 'edit pdf'] },
+			en: { title: 'Add text or images to PDF', desc: 'Write Arabic or English text, or place an image, anywhere on the pages.', keywords: ['add text', 'edit pdf', 'annotate', 'insert image'] }
+		}
+	}),
+	pdf({
+		id: 'fill-pdf-form',
+		to: ['pdf'],
+		engine: 'pdf-forms',
+		batch: false,
+		editor: 'form',
+		params: { action: 'fill' },
+		options: [{ id: 'flatten', type: 'checkbox', label: { ar: 'تثبيت القيم (لا يمكن تعديلها بعد ذلك)', en: 'Flatten (values can no longer be edited)' }, default: true }],
+		i18n: {
+			ar: { title: 'تعبئة نماذج PDF', desc: 'املأ خانات النموذج بالعربية أو الإنجليزية، وثبّتها في الملف إن أردت.', keywords: ['نموذج', 'تعبئة', 'fill form', 'استمارة'] },
+			en: { title: 'Fill PDF forms', desc: 'Fill the form fields in Arabic or English, and flatten them into the page if you like.', keywords: ['fill form', 'form', 'flatten', 'acroform'] }
+		}
+	}),
+	pdf({
 		id: 'split-pdf',
 		to: ['pdf'],
 		engine: 'pdf-split',

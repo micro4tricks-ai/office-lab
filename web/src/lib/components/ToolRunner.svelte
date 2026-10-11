@@ -2,11 +2,14 @@
 	import { onDestroy, untrack } from 'svelte';
 	import { t } from '../i18n';
 	import { formatList } from '../registry/tools';
-	import type { FileData, Lang, OptionSpec, Options, Tool } from '../registry/types';
+	import type { FileData, FormValues, Lang, OptionSpec, Options, PagePlan, Placement, Tool } from '../registry/types';
 	import { ConvertError } from '../registry/types';
 	import { prepare } from '../workers/prepare';
 	import { acceptOf, createRunner, validate } from '../workers/runner.svelte';
 	import DropZone from './DropZone.svelte';
+	import PdfOrganizer from './PdfOrganizer.svelte';
+	import PdfForm from './PdfForm.svelte';
+	import PdfPlacer from './PdfPlacer.svelte';
 	import ResultList, { type Item } from './ResultList.svelte';
 
 	let { tool, lang }: { tool: Tool; lang: Lang } = $props();
@@ -22,6 +25,7 @@
 	);
 	let missing = $state<string | null>(null);
 	let countError = $state(false);
+	let editorError = $state<string | null>(null);
 
 	const pending = $derived(items.some((i) => i.status === 'waiting'));
 	const finished = $derived(items.length > 0 && items.every((i) => i.status === 'done' || i.status === 'error'));
@@ -49,6 +53,13 @@
 		const file = input.files?.[0];
 		options[id] = file ? ((await prepare(file)) as FileData) : null;
 	}
+
+	/** Editors get previews (and other helper runs) from the same worker pool. */
+	const runEngine = async (engine: string, file: File, opts: Record<string, string | number>) =>
+		runner.runData(engine, await prepare(file), opts);
+	const preview = (file: File, opts: Record<string, string | number>) => runEngine('pdf-thumbs', file, opts);
+	/** The one file an editor works on (editor tools take a single file). */
+	const editing = $derived(tool.editor ? items.find((i) => i.status === 'waiting') : undefined);
 
 	/** Unexpected failures go to the console so a bug report can include them. */
 	function errorCode(e: unknown) {
@@ -110,6 +121,11 @@
 			return;
 		}
 		missing = null;
+		editorError = null;
+		if (tool.editor === 'place' && !(options.items as Placement[] | undefined)?.length) {
+			editorError = t(lang, 'place.needItem');
+			return;
+		}
 		busy = true;
 		if (tool.combine) {
 			await convertCombined(tool.combine.min, tool.combine.max);
@@ -137,6 +153,27 @@
 			onfiles={add}
 		/>
 	{:else}
+		{#if editing && tool.editor === 'organize'}
+			{#key editing.id}
+				<PdfOrganizer {lang} file={editing.file} {preview} bind:plan={options.plan as PagePlan[] | null} />
+			{/key}
+		{:else if editing && tool.editor === 'place'}
+			{#key editing.id}
+				<PdfPlacer
+					{lang}
+					file={editing.file}
+					mode={tool.params?.mode === 'sign' ? 'sign' : 'annotate'}
+					{preview}
+					bind:placements={options.items as Placement[] | null}
+				/>
+			{/key}
+		{/if}
+		{#if editing && tool.editor === 'form'}
+			{#key editing.id}
+				<PdfForm {lang} file={editing.file} run={runEngine} bind:values={options.fields as FormValues | null} />
+			{/key}
+		{/if}
+		{#if editorError}<p class="err" role="alert">{editorError}</p>{/if}
 		{#if visible.length && !finished}
 			<fieldset class="options" disabled={busy}>
 				<legend>{t(lang, 'tool.options')}</legend>
