@@ -47,6 +47,14 @@ def cell_text(words, bbox) -> str:
     return LIGATURE.sub(r"ال\1", " ".join(out)).strip()
 
 
+def put(ws, row: int, col: int, v) -> None:
+    """Writes a value; text always stays text. openpyxl would turn "=..." into a live formula,
+    so a PDF could plant formulas (=HYPERLINK, DDE) in the workbook."""
+    cell = ws.cell(row=row, column=col, value=v)
+    if isinstance(v, str):
+        cell.data_type = "s"
+
+
 def main(src: str, dst: str) -> int:
     wb = Workbook()
     wb.remove(wb.active)
@@ -65,7 +73,7 @@ def main(src: str, dst: str) -> int:
                 for r, row in enumerate(rows, start=1):
                     # An Arabic table reads from the right: its first column is the rightmost one.
                     for c, cell in enumerate(reversed(row) if rtl else row, start=1):
-                        ws.cell(row=r, column=c, value=value(cell))
+                        put(ws, r, c, value(cell))
                 for cell in ws[1]:
                     cell.font = Font(bold=True)
                 for col in ws.columns:

@@ -101,6 +101,24 @@ def test_pdf_to_excel_tables(client):
     assert convert(client, "pdf-to-excel", "text.pdf", expect=422).json() == {"code": "nothing"}
 
 
+def test_pdf_to_excel_never_writes_formulas(tmp_path):
+    """Text that looks like a formula in a PDF must land in Excel as plain text."""
+    import importlib.util
+
+    from openpyxl import Workbook, load_workbook
+
+    spec = importlib.util.spec_from_file_location("pdf_to_xlsx", Path(main.__file__).parent / "scripts" / "pdf_to_xlsx.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    wb = Workbook()
+    for i, text in enumerate(['=HYPERLINK("http://x","click")', "=1+1", "+cmd|' /C calc'!A0", "@SUM(1)"], start=1):
+        mod.put(wb.active, i, 1, mod.value(text))
+    wb.save(tmp_path / "f.xlsx")
+    back = load_workbook(tmp_path / "f.xlsx").active
+    assert [c.data_type for c in back["A"]] == ["s"] * 4
+    assert back["A1"].value.startswith("=HYPERLINK")
+
+
 def test_word_to_pdfa(client):
     assert b"pdfaid" in convert(client, "word-to-pdf", "report.docx", {"pdfa": True}).content
 
