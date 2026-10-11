@@ -6,7 +6,7 @@
 الأدوات التي تعمل في المتصفح لا ترفع ملفك إلى أي مكان؛ كل شيء يحدث على جهازك.
 
 - **النسخة الثابتة (المتصفح فقط):** تُنشر على GitHub Pages — https://micro4tricks-ai.github.io/office-lab/
-- **نسخة الخادم (Docker):** للتحويلات الثقيلة (Office ↔ PDF، PDF → Word، الكتب الإلكترونية…) — قيد الإنشاء (المرحلة 4).
+- **نسخة الخادم (Docker):** للتحويلات الثقيلة (Office ↔ PDF، PDF → Word، الكتب الإلكترونية، OCR للملفات الكبيرة…). التشغيل: `docker compose -f deploy/docker-compose.yml up -d --build` ثم http://localhost — والتركيب على VPS في `deploy/HOSTINGER.md`.
 
 ### التشغيل محليًا
 </div>
@@ -19,7 +19,7 @@ npm run dev
 
 <div dir="rtl">
 
-> الحالة الحالية: المرحلة 0 (الهيكل والنشر). راجع `docs/PROGRESS.md`.
+> الحالة الحالية: 91 أداة (73 في المتصفح و18 في نسخة الخادم). راجع `docs/PROGRESS.md` و`docs/FORMATS.md`.
 
 </div>
 
@@ -29,7 +29,8 @@ npm run dev
 Browser tools never upload your file: everything runs on your device.
 
 - **Static site (browser-only):** deployed to GitHub Pages — https://micro4tricks-ai.github.io/office-lab/
-- **Server version (Docker):** heavy conversions (Office ↔ PDF, PDF → Word, ebooks…) — coming in Phase 4.
+- **Server version (Docker):** heavy conversions (Office ↔ PDF, PDF → Word, ebooks, OCR for long scans…).
+  `docker compose -f deploy/docker-compose.yml up -d --build` → http://localhost. VPS guide: `deploy/HOSTINGER.md` (Arabic).
 
 ### Run locally
 
@@ -47,6 +48,8 @@ npx playwright test    # end-to-end (after a build)
 | Path | What |
 |---|---|
 | `web/` | SvelteKit static site — registry, adapters, workers, i18n |
+| `server/` | FastAPI conversion API (Docker image with calibre, pandoc, OCRmyPDF, Ghostscript, qpdf) |
+| `deploy/` | docker compose (Caddy + API + Gotenberg), Caddyfile, VPS install script and guide |
 | `docs/` | Build spec, progress log, supported formats |
 | `.github/workflows/` | CI (build + tests) and GitHub Pages deploy |
 

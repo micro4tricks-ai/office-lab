@@ -1,7 +1,7 @@
 # Supported tools and formats
 
 > From `web/src/lib/registry/` (a generator comes in Phase 5 — until then, keep in sync by hand).
-> Everything below runs in the browser; nothing is uploaded. 73 tools.
+> 91 tools: 73 run in the browser (nothing is uploaded), 18 need the server version (Docker, see `deploy/`).
 
 Image inputs: JPG/JPEG/JFIF, PNG, WebP, AVIF, GIF (first frame), BMP, TIFF, SVG, ICO, HEIC/HEIF, JXL.
 Spreadsheet inputs: XLSX, XLSM, XLS, ODS, CSV/TSV (UTF-8 or Windows-1256), JSON arrays.
@@ -52,3 +52,19 @@ Spreadsheet inputs: XLSX, XLSM, XLS, ODS, CSV/TSV (UTF-8 or Windows-1256), JSON 
 
 ## Files (3)
 `create-zip` · `extract-zip` · `batch-rename`
+
+## Server version (18) — Docker: FastAPI + Gotenberg
+| Tool | In → Out | Engine |
+|---|---|---|
+| `word-to-pdf` | DOCX / DOC / ODT / RTF → PDF (optional PDF/A) | LibreOffice (Gotenberg) |
+| `excel-to-pdf` | XLSX / XLS / ODS → PDF (one page per sheet option) | LibreOffice |
+| `powerpoint-to-pdf` | PPTX / PPT / PPSX / PPS / ODP → PDF | LibreOffice |
+| `html-to-pdf` | HTML → PDF (+ the Markdown studio's one-click PDF) | Chromium (Gotenberg) |
+| `url-to-pdf` · `url-to-image` | web page → PDF / PNG · JPG · WebP | Chromium |
+| `pdf-to-pdfa` | PDF → PDF/A-1b / 2b / 3b | Gotenberg PDF engines |
+| `pdf-to-word` | PDF → DOCX | pdf2docx |
+| `compress-pdf-strong` | PDF → PDF (levels or a target size) | Ghostscript |
+| `repair-pdf` | PDF → PDF | qpdf, then Ghostscript |
+| `ocr-pdf-server` | scanned PDF (any length) → searchable PDF / PDF/A | OCRmyPDF + Tesseract (ara, eng) |
+| `ebook-convert` · `epub-to-pdf` · `pdf-to-epub` · `mobi-to-epub` | EPUB / MOBI / AZW3 / FB2 / DOCX / PDF / TXT | calibre |
+| `document-convert` · `latex-to-word` · `word-to-latex` | MD / DOCX / ODT / EPUB / HTML / LaTeX / RST | pandoc (`--sandbox`) |
