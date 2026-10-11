@@ -1,5 +1,6 @@
 import { inWorker } from '../workers/proxy';
 import { imageTools } from './image-tools';
+import { dataTools } from './data-tools';
 import { pdfTools } from './pdf-tools';
 import type { Tool } from './types';
 
@@ -7,6 +8,7 @@ import type { Tool } from './types';
 export const tools: Tool[] = [
 	...pdfTools,
 	...imageTools,
+	...dataTools,
 	{
 		id: 'txt-to-html',
 		category: 'document',
