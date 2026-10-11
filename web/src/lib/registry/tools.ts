@@ -3,6 +3,7 @@ import { imageTools } from './image-tools';
 import { dataTools } from './data-tools';
 import { docTools } from './doc-tools';
 import { ocrTools } from './ocr-tools';
+import { filesTools } from './files-tools';
 import { officeTools } from './office-tools';
 import { pdfTools } from './pdf-tools';
 import type { Tool } from './types';
@@ -15,6 +16,7 @@ export const tools: Tool[] = [
 	...docTools,
 	...ocrTools,
 	...officeTools,
+	...filesTools,
 	{
 		id: 'txt-to-html',
 		category: 'document',
@@ -59,6 +61,6 @@ const ALIASES: Record<string, string> = { jpeg: 'jpg', jfif: 'jpg', tif: 'tiff',
 
 /** Readable, de-duplicated format names (no MIME types): "JPG · PNG · HEIC". `max` trims with "+N". */
 export function formatList(list: string[], max = Infinity) {
-	const names = [...new Set(list.filter((f) => !f.includes('/')).map((f) => (ALIASES[f] ?? f).toUpperCase()))];
+	const names = [...new Set(list.filter((f) => !f.includes('/') && f !== '*').map((f) => (ALIASES[f] ?? f).toUpperCase()))];
 	return names.length > max ? [...names.slice(0, max), `+${names.length - max}`] : names;
 }

@@ -9,5 +9,7 @@ export const widgets: Partial<Record<WidgetKey, () => Promise<{ default: Widget 
 	tafqeet: () => import('./Tafqeet.svelte'),
 	hijri: () => import('./HijriDate.svelte'),
 	'arabic-text': () => import('./ArabicText.svelte'),
-	vat: () => import('./VatCalculator.svelte')
+	vat: () => import('./VatCalculator.svelte'),
+	qr: () => import('./QrMaker.svelte'),
+	barcode: () => import('./BarcodeMaker.svelte')
 };
