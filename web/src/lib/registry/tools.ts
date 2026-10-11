@@ -3,6 +3,7 @@ import { imageTools } from './image-tools';
 import { dataTools } from './data-tools';
 import { docTools } from './doc-tools';
 import { ocrTools } from './ocr-tools';
+import { officeTools } from './office-tools';
 import { pdfTools } from './pdf-tools';
 import type { Tool } from './types';
 
@@ -13,6 +14,7 @@ export const tools: Tool[] = [
 	...dataTools,
 	...docTools,
 	...ocrTools,
+	...officeTools,
 	{
 		id: 'txt-to-html',
 		category: 'document',

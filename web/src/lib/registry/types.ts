@@ -1,8 +1,8 @@
 export type Lang = 'ar' | 'en';
 export const LANGS: Lang[] = ['ar', 'en'];
 
-export type Category = 'image' | 'pdf' | 'document' | 'data' | 'ebook' | 'media' | 'ocr';
-export const CATEGORIES: Category[] = ['image', 'pdf', 'document', 'data', 'ebook', 'media', 'ocr'];
+export type Category = 'image' | 'pdf' | 'document' | 'data' | 'office' | 'files' | 'ebook' | 'media' | 'ocr';
+export const CATEGORIES: Category[] = ['pdf', 'image', 'document', 'data', 'office', 'ocr', 'files', 'ebook', 'media'];
 
 /** A file as it crosses the worker boundary. `note` is an optional i18n key shown with a result. */
 export type FileData = { name: string; type: string; bytes: Uint8Array; note?: NoteKey };

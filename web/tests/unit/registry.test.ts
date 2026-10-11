@@ -15,8 +15,8 @@ describe('registry', () => {
 	it('every tool is complete in both languages', () => {
 		for (const t of tools) {
 			expect(CATEGORIES).toContain(t.category);
-			expect(t.from.length).toBeGreaterThan(0);
-			expect(t.maxMB).toBeGreaterThan(0);
+			if (!t.widget) expect(t.from.length).toBeGreaterThan(0);
+			if (!t.widget) expect(t.maxMB).toBeGreaterThan(0);
 			for (const l of ['ar', 'en'] as const) {
 				expect(t.i18n[l].title, `${t.id} ${l} title`).toBeTruthy();
 				expect(t.i18n[l].desc, `${t.id} ${l} desc`).toBeTruthy();
@@ -28,7 +28,7 @@ describe('registry', () => {
 	});
 
 	it('every engine exists and its adapter loads', async () => {
-		for (const t of tools) {
+		for (const t of tools.filter((x) => !x.widget)) {
 			expect(engines[t.engine], t.engine).toBeTypeOf('function');
 			const a = await engines[t.engine]();
 			expect(a.convert, t.engine).toBeTypeOf('function');
