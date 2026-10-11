@@ -61,7 +61,7 @@
 
 <style>
 	.page {
-		max-width: 52rem;
+		max-width: 68rem;
 		padding-block: var(--space-6) var(--space-12);
 		display: grid;
 		gap: var(--space-6);
