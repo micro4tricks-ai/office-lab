@@ -212,5 +212,11 @@
 	"w.web.badUrl": "This address can't be opened. Enter a public web page such as https://example.com",
 	"md.direct": "Download PDF",
 	"md.directBusy": "Making the PDF…",
-	"result.text": "Extracted text"
+	"result.text": "Extracted text",
+	"place.redactTitle": "Cover what you want to hide",
+	"place.box": "Redaction box",
+	"place.boxLabel": "Redaction box",
+	"place.redactEmpty": "Add a black box, move it over the name or number, and drag its corner to change its width and height.",
+	"note.no-form": "The file has no form fields; nothing changed",
+	"tool.needFile": "Choose the file first."
 }

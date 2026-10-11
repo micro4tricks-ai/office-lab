@@ -221,3 +221,12 @@ function doubleSize(gray: Uint8Array, w: number, h: number) {
 	}
 	return { gray: out, width: W, height: H };
 }
+
+/** "Scanned document" look for phone photos of paper: white page, dark text, straightened, gray. */
+export function scanLook(image: ImageData): ImageData {
+	let gray = evenLight(toGray(image.data, image.width, image.height), image.width, image.height);
+	let { width, height } = image;
+	const angle = skewAngle(gray, width, height);
+	if (Math.abs(angle) >= 0.3) ({ gray, width, height } = rotateGray(gray, width, height, angle));
+	return new ImageData(grayToRgba(gray), width, height);
+}

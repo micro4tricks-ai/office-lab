@@ -162,7 +162,7 @@
 				<PdfPlacer
 					{lang}
 					file={editing.file}
-					mode={tool.params?.mode === 'sign' ? 'sign' : 'annotate'}
+					mode={tool.params?.mode === 'sign' || tool.params?.mode === 'redact' ? tool.params.mode : 'annotate'}
 					{preview}
 					bind:placements={options.items as Placement[] | null}
 				/>
@@ -217,13 +217,13 @@
 								<input
 									id="opt-{opt.id}"
 									type="file"
-									accept="image/*"
+									accept={opt.accept ?? 'image/*'}
 									aria-invalid={missing === opt.id}
 									aria-describedby={missing === opt.id ? `err-${opt.id}` : undefined}
 									onchange={(e) => pickImage(opt.id, e)}
 								/>
 								{#if missing === opt.id}
-									<span id="err-{opt.id}" class="err" role="alert">{t(lang, 'tool.needImage')}</span>
+									<span id="err-{opt.id}" class="err" role="alert">{t(lang, opt.accept ? 'tool.needFile' : 'tool.needImage')}</span>
 								{/if}
 							{:else if opt.type === 'range'}
 								<input

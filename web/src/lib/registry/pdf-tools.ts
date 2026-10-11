@@ -288,6 +288,16 @@ export const pdfTools: Tool[] = [
 		combine: { min: 1 },
 		options: [
 			{
+				id: 'enhance',
+				type: 'select',
+				label: { ar: 'تحسين الصور', en: 'Clean up' },
+				default: 'none',
+				choices: [
+					{ value: 'none', label: { ar: 'بدون (كما هي)', en: 'None (as they are)' } },
+					{ value: 'scan', label: { ar: 'كمستند ممسوح ضوئيًا (لصور الموبايل)', en: 'Like a scanned document (phone photos)' } }
+				]
+			},
+			{
 				id: 'pageSize',
 				type: 'select',
 				label: { ar: 'مقاس الصفحة', en: 'Page size' },

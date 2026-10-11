@@ -14,13 +14,14 @@
 	}: {
 		lang: Lang;
 		file: File;
-		/** 'sign': draw / type / image / date. 'annotate': text / image. */
-		mode: 'sign' | 'annotate';
+		/** 'sign': draw / type / image / date. 'annotate': text / image. 'redact': black boxes. */
+		mode: 'sign' | 'annotate' | 'redact';
 		preview: (file: File, options: Record<string, string | number>) => Promise<FileData[]>;
 		placements: Placement[] | null;
 	} = $props();
 
-	type Item = Placement & { id: number; url: string; label: string };
+	/** `free`: width and height resize separately (redaction boxes). */
+	type Item = Placement & { id: number; url: string; label: string; free?: boolean };
 	type Size = { w: number; h: number };
 
 	let sizes = $state<Size[]>([]);
@@ -95,6 +96,30 @@
 		items.push(item);
 		selected = item.id;
 		panel = null;
+	}
+
+	/** A black box (a 2×2 black PNG, stretched) that hides what is under it. */
+	async function addBox() {
+		const c = new OffscreenCanvas(2, 2);
+		const ctx = c.getContext('2d')!;
+		ctx.fillStyle = '#000';
+		ctx.fillRect(0, 0, 2, 2);
+		const bytes = new Uint8Array(await (await c.convertToBlob({ type: 'image/png' })).arrayBuffer());
+		const w = 0.35;
+		const h = 0.035;
+		items.push({
+			id: ++seq,
+			page: current,
+			x: 0.5 - w / 2,
+			y: 0.3,
+			w,
+			h,
+			png: { name: 'box.png', type: 'image/png', bytes },
+			url: URL.createObjectURL(new Blob([bytes], { type: 'image/png' })),
+			label: t(lang, 'place.boxLabel'),
+			free: true
+		});
+		selected = seq;
 	}
 
 	async function addTyped() {
@@ -177,6 +202,9 @@
 		if (drag.kind === 'move') {
 			item.x = Math.min(1 - item.w, Math.max(0, drag.x + dx));
 			item.y = Math.min(1 - item.h, Math.max(0, drag.y + dy));
+		} else if (item.free) {
+			item.w = Math.min(1 - item.x, Math.max(0.01, drag.w + dx));
+			item.h = Math.min(1 - item.y, Math.max(0.008, drag.h + dy));
 		} else {
 			const w = Math.min(1 - item.x, Math.max(0.03, drag.w + dx));
 			item.h = (drag.h / drag.w) * w;
@@ -217,10 +245,12 @@
 </script>
 
 <section class="placer" aria-labelledby="place-title">
-	<h2 id="place-title">{t(lang, mode === 'sign' ? 'place.signTitle' : 'place.annotateTitle')}</h2>
+	<h2 id="place-title">{t(lang, mode === 'sign' ? 'place.signTitle' : mode === 'redact' ? 'place.redactTitle' : 'place.annotateTitle')}</h2>
 
 	<div class="toolbar" role="toolbar" aria-label={t(lang, 'place.add')}>
-		{#if mode === 'sign'}
+		{#if mode === 'redact'}
+			<button class="btn btn-primary" type="button" onclick={addBox} data-testid="add-box"><Icon name="plus" />{t(lang, 'place.box')}</button>
+		{:else if mode === 'sign'}
 			<button class="btn" type="button" aria-pressed={panel === 'draw'} onclick={() => (panel = panel === 'draw' ? null : 'draw')}>
 				<Icon name="pen" />{t(lang, 'place.draw')}
 			</button>
@@ -232,10 +262,12 @@
 				<Icon name="text" />{t(lang, 'place.text')}
 			</button>
 		{/if}
-		<label class="btn">
-			<Icon name="image" />{t(lang, mode === 'sign' ? 'place.signImage' : 'place.image')}
-			<input class="visually-hidden" type="file" accept="image/*" onchange={addImage} data-testid="place-image" />
-		</label>
+		{#if mode !== 'redact'}
+			<label class="btn">
+				<Icon name="image" />{t(lang, mode === 'sign' ? 'place.signImage' : 'place.image')}
+				<input class="visually-hidden" type="file" accept="image/*" onchange={addImage} data-testid="place-image" />
+			</label>
+		{/if}
 		{#if mode === 'sign'}
 			<button class="btn" type="button" onclick={addDate}>{t(lang, 'place.date')}</button>
 		{/if}
@@ -359,7 +391,7 @@
 				<button class="btn" type="button" onclick={() => remove(sel.id)}><Icon name="x" />{t(lang, 'place.remove')}</button>
 			</div>
 		{/if}
-		<p class="hint">{items.length ? t(lang, 'place.count', { n: items.length }) : t(lang, 'place.empty')}</p>
+		<p class="hint">{items.length ? t(lang, 'place.count', { n: items.length }) : t(lang, mode === 'redact' ? 'place.redactEmpty' : 'place.empty')}</p>
 	{/if}
 </section>
 

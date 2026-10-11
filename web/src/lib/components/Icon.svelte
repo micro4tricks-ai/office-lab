@@ -27,7 +27,8 @@
 		media: 'M4 5h16v14H4zm6 4v6l5-3z',
 		ocr: 'M4 8V5h3m10 0h3v3m0 8v3h-3M7 19H4v-3m4-6h8m-8 4h5',
 		office: 'M5 4h14v16H5zM8 8h8M8 12h8M8 16h4',
-		files: 'M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z'
+		files: 'M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z',
+		plus: 'M12 5v14M5 12h14'
 	};
 	export type IconName = keyof typeof paths;
 </script>

@@ -40,5 +40,6 @@ export const engines: Record<string, () => Promise<Adapter>> = {
 	'zip': lazy(() => import('./files/zip')),
 	'rename': lazy(() => import('./files/rename')),
 	'pdf-layout': lazy(() => import('./pdf/layout')),
+	'pdf-reshape': lazy(() => import('./pdf/reshape')),
 	'sheet-ops': lazy(() => import('./data/sheet-ops'))
 };
