@@ -1,10 +1,11 @@
 # Progress
-Current phase: 3 — Documents, data, OCR
+Current phase: 4 — Server API + Docker
 
 ## Done
 - [x] Phase 0 (2026-10-11) — scaffold, registry, worker runner, UI shell, CI + Pages. Pages: https://micro4tricks-ai.github.io/office-lab/
 - [x] Phase 1 (2026-10-11) — 14 image tools, worker pool, 28 vitest + 49 playwright green
 - [x] Phase 2 (2026-10-11) — 21 PDF tools incl. organize / sign / edit / forms; 33 vitest + 90 playwright green
+- [x] Phase 3 + owner-requested extras (2026-10-11) — 73 tools in total; 116 vitest + 144 playwright green
 
 ## Phase 0 checklist
 - [x] repo layout, CLAUDE.md, LICENSE (AGPL-3.0), README, docs/BUILD_PROMPT.md
@@ -37,6 +38,20 @@ Current phase: 3 — Documents, data, OCR
 - [x] protect (AES-256) / unlock with a known password — in the browser, no qpdf needed
 - [x] 200-page PDF + 3 pages merged in ~0.3 s, no main-thread long tasks
 
+## Phase 3 checklist
+- [x] Markdown → PDF studio: live preview, per-paragraph direction, Arabic fonts (Cairo/Amiri/Noto Naskh), tables, code, KaTeX, Mermaid; TOC, header/footer, page numbers (Arabic-Indic option); templates simple / report (cover) / CV / letter; Paged.js + print
+- [x] Markdown → HTML (single file) and → DOCX (headings, lists, tables, code, RTL)
+- [x] DOCX → HTML / Markdown (mammoth + turndown on a domino DOM), images inline or as files
+- [x] Data: XLSX/XLS/ODS/CSV/JSON → CSV/JSON/HTML/MD/SQL/XLSX; JSON ↔ YAML ↔ XML ↔ TOML
+- [x] OCR images and scanned PDFs (≤20 pages): text or searchable PDF; Arabic fixture 100% characters right
+- [x] Arabic MD prints a correct RTL PDF (checked by rendering Chromium's PDF)
+
+## Extras the owner asked for (2026-10-11)
+- [x] Arabic office tools: tafqeet (amount in words, EGP/SAR/AED/KWD/USD/EUR), Hijri ↔ Gregorian, Arabic text clean-up, VAT calculator
+- [x] QR maker (text/Wi-Fi/contact, Arabic as UTF-8) + QR reader, barcode maker, create/extract ZIP, batch rename
+- [x] PDF: black & white, 2/4 per sheet, booklet (Arabic binding), blank pages, header/footer text
+- [x] Spreadsheets: merge, split, remove duplicates, clean, contacts Excel ↔ vCard
+
 ## Decisions / defaults used
 - Name: **Office Lab** / «المعمل» (owner renamed from Hawwil). Repo `micro4tricks-ai/office-lab`, local `C:\Users\Admin\projects\office-lab`.
 - SvelteKit **3** (what `sv create` installs now): config in `web/vite.config.ts`, `#lib/...` imports with file extensions.
@@ -65,5 +80,13 @@ Current phase: 3 — Documents, data, OCR
 - Signature fonts: Aref Ruqaa + Dancing Script (OFL, @fontsource), loaded only when the editor opens.
 - Page parsing: "1-3, 5, 8-", Arabic digits/comma ok; a range end past the last page is clamped, a single page past it is an error.
 
+- Phase 3: SheetJS CE from cdn.sheetjs.com tarball (0.20.3). Arabic CSV in Windows-1256 is detected; CSV out gets a BOM; leading zeros (phones) survive. CSV output defuses formula injection; SQL has a MySQL dialect (backslash escaping).
+- Every ZIP download goes through `safeEntryName` (zip-slip guard); extract-zip caps 5000 entries / 1 GB unpacked.
+- OCR: tesseract.js v7 + `best_int` ara/eng models from npm (about as small as tessdata_fast, more accurate); all core builds copied (v7 also uses relaxedsimd). Searchable PDF = original page + invisible Amiri text layer with shaping features off (shaped glyphs extract as garbage); fonts embedded whole (fontkit's subsetter fails on these WOFFs).
+- The runner passes the UI language as `uiLang` (never `lang`: it overwrote the OCR option of that name). A unit test keeps options from using it.
+- Paged.js and Tesseract are self-hosted by `scripts/copy-assets.mjs`, which also runs before `svelte-check` (asset() paths are typed from static/).
+- Widgets (`Tool.widget`): tools with their own page and no file runner (Markdown studio, tafqeet, Hijri, Arabic text, VAT, QR, barcode).
+- Known low-risk audit items: `argparse`→`sprintf-js` (mammoth's CLI only, not bundled) and KaTeX prototype-pollution note (needs an existing pollution; we render the user's own text with trust off).
+
 ## Next step (exact)
-- Phase 3 (documents, data, OCR — browser): read BUILD_PROMPT §6 Phase 3. Start with Markdown → PDF (the flagship): editor + live RTL preview, Paged.js print; then DOCX → HTML/MD, data conversions, OCR (tesseract.js, self-hosted ara+eng).
+- Phase 4 (server API + Docker): read BUILD_PROMPT §6 Phase 4. FastAPI in `server/` with /api/health, /api/capabilities, /api/convert/{tool}; Gotenberg for Office → PDF; deploy/ docker-compose + Caddyfile; `deploy/HOSTINGER.md` in Arabic. Docker is not installed on this PC yet — install Docker Desktop first (ask the owner).
