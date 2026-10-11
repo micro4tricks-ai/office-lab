@@ -81,6 +81,17 @@ export const serverTools: Tool[] = [
 		}
 	}),
 	server({
+		id: 'convert-to-pdf',
+		category: 'pdf',
+		from: ['doc', 'docx', 'docm', 'dot', 'dotx', 'odt', 'ott', 'rtf', 'txt', 'wpd', 'wps', 'hwp', 'pages', 'xls', 'xlsx', 'xlsm', 'xlsb', 'ods', 'numbers', 'ppt', 'pptx', 'pptm', 'pps', 'ppsx', 'odp', 'key', 'odg', 'pub', 'vsd', 'vsdx', 'svg', 'emf', 'wmf'],
+		to: ['pdf'],
+		options: [landscape, pdfa],
+		i18n: {
+			ar: { title: 'تحويل أي ملف إلى PDF', desc: 'حوّل ملفات Publisher وVisio والرسومات (ODG) والنصوص وملفات Apple (Pages وNumbers وKeynote) وغيرها إلى PDF، عبر LibreOffice.', keywords: ['تحويل إلى pdf', 'publisher', 'visio', 'odg', 'txt إلى pdf', 'pages'] },
+			en: { title: 'Convert anything to PDF', desc: 'Turn Publisher, Visio, drawings (ODG), plain text, Apple Pages/Numbers/Keynote and more into PDF, using LibreOffice.', keywords: ['convert to pdf', 'publisher to pdf', 'visio to pdf', 'txt to pdf', 'odg'] }
+		}
+	}),
+	server({
 		id: 'html-to-pdf',
 		category: 'pdf',
 		from: ['html', 'htm'],
@@ -163,6 +174,16 @@ export const serverTools: Tool[] = [
 		i18n: {
 			ar: { title: 'PDF إلى Word', desc: 'حوّل PDF إلى مستند Word قابل للتعديل مع الجداول والصور. يعمل مع ملفات PDF النصية؛ الممسوحة ضوئيًا تحتاج OCR أولًا.', keywords: ['pdf', 'word', 'docx', 'تعديل pdf', 'وورد'] },
 			en: { title: 'PDF to Word', desc: 'Turn a PDF into an editable Word document, with tables and images. Works on text PDFs; scans need OCR first.', keywords: ['pdf', 'word', 'docx', 'edit pdf'] }
+		}
+	}),
+	server({
+		id: 'pdf-to-excel',
+		category: 'pdf',
+		from: ['pdf'],
+		to: ['xlsx'],
+		i18n: {
+			ar: { title: 'PDF إلى Excel', desc: 'استخرج الجداول من ملف PDF إلى Excel: كل جدول في ورقة، والأرقام أرقام يمكن جمعها، والجداول العربية من اليمين لليسار.', keywords: ['pdf إلى excel', 'استخراج جدول', 'pdf اكسل', 'جداول pdf'] },
+			en: { title: 'PDF to Excel', desc: 'Pull the tables out of a PDF into Excel: one sheet per table, numbers as numbers, Arabic tables right to left.', keywords: ['pdf to excel', 'extract tables', 'pdf to xlsx', 'table'] }
 		}
 	}),
 	server({
