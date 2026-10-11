@@ -37,10 +37,14 @@ test.describe('image tools', () => {
 	test('every input format converts to PNG (orientation applied)', async ({ page }) => {
 		await convert(page, 'convert-to-png', ALL_INPUTS);
 		await expect(page.locator('[data-status="done"]')).toHaveCount(ALL_INPUTS.length);
-		for (const f of ALL_INPUTS) {
-			const out = await grab(page, `${f.replace(/\.\w+$/, '.png')}`);
-			expect(starts(out.bytes, magic.png), f).toBe(true);
-			if (f === 'photo.jpg') expect(pngSize(out.bytes)).toEqual([128, 96]); // stored sideways, EXIF says rotate
+		// Rows keep the input order; several inputs share a name (photo.*), so download row by row.
+		const rows = page.locator('[data-status="done"]');
+		for (const [i, f] of ALL_INPUTS.entries()) {
+			const dl = page.waitForEvent('download');
+			await rows.nth(i).getByRole('button', { name: /^Download / }).click();
+			const out = readFileSync((await (await dl).path())!);
+			expect(starts(out, magic.png), f).toBe(true);
+			if (f === 'photo.jpg') expect(pngSize(out)).toEqual([128, 96]); // stored sideways, EXIF says rotate
 		}
 	});
 
