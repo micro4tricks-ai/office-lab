@@ -94,6 +94,14 @@ def test_html_cannot_reach_internal_services_or_files(client):
     r = convert(client, "html-to-pdf", "hostile.html")
     no_secrets(pdf_text(r.content))
 
+def test_html_cannot_list_other_jobs(client):
+    """Gotenberg keeps each request to its own folder: no listing of /tmp or sibling jobs."""
+    html = ('<!doctype html><h1>probe</h1><iframe src="../"></iframe><iframe src="../../"></iframe>'
+            '<iframe src="file:///tmp/"></iframe><object data="../../"></object>').encode()
+    text = pdf_text(convert(client, "html-to-pdf", ("index.html", html)).content)
+    assert "probe" in text and "Index of" not in text
+
+
 def test_url_to_pdf_and_image(client):
     assert "documentation examples" in pdf_text(convert(client, "url-to-pdf", url="https://example.com").content)
     png = convert(client, "url-to-image", url="https://example.com", options={"device": "phone"}).content
