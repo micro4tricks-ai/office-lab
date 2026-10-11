@@ -18,10 +18,10 @@ function accuracy(expected: string, got: string) {
 	return 1 - prev[b.length] / a.length;
 }
 
-async function ocr(page: Page, tool: string, file: string, output: 'txt' | 'pdf') {
+async function ocr(page: Page, tool: string, file: string, output: 'txt' | 'pdf', lang = 'ara') {
 	await page.goto(`en/${tool}/`);
 	await page.getByTestId('file-input').setInputFiles(fx(file));
-	await page.getByLabel('Text language').selectOption('ara');
+	await page.getByLabel('Text language').selectOption(lang);
 	await page.getByLabel('Output').selectOption(output);
 	await page.getByRole('button', { name: 'Convert', exact: true }).click();
 	await expect(page.locator('[data-status="waiting"], [data-status="working"]')).toHaveCount(0, { timeout: 150_000 });
@@ -40,6 +40,15 @@ test.describe('OCR', () => {
 		const score = accuracy(readFileSync(fx('arabic.txt'), 'utf8'), text);
 		console.log(`OCR accuracy: ${(score * 100).toFixed(1)}%\n${text}`);
 		expect(score).toBeGreaterThanOrEqual(0.85);
+	});
+
+	test('a phone photo (shadow, tilt, small text) with the default settings: at least 90% right, shown on the page', async ({ page }) => {
+		const text = (await ocr(page, 'ocr-image', 'photo-letter.jpg', 'txt', 'ara+eng')).toString('utf8');
+		const score = accuracy(readFileSync(fx('photo-letter.txt'), 'utf8'), text);
+		console.log(`Photo OCR accuracy: ${(score * 100).toFixed(1)}%
+${text}`);
+		expect(score).toBeGreaterThanOrEqual(0.9);
+		await expect(page.getByTestId('result-text')).toHaveValue(/الصيانة الدورية/);
 	});
 
 	test('scanned PDF → searchable PDF (the words can be found)', async ({ page }) => {

@@ -120,6 +120,13 @@ register(ServerTool("word-to-pdf", frozenset({"doc", "docx", "odt", "rtf"}), lib
 register(ServerTool("excel-to-pdf", frozenset({"xls", "xlsx", "ods"}), libreoffice, G,
                     {"landscape": landscape, "one_page": Opt("bool", False), "pdfa": pdfa}))
 register(ServerTool("powerpoint-to-pdf", frozenset({"ppt", "pptx", "pps", "ppsx", "odp"}), libreoffice, G, {"pdfa": pdfa}))
+# Everything else LibreOffice opens: Publisher, Visio, drawings, old and Apple formats, plain text.
+ANY_OFFICE = frozenset({
+    "doc", "docx", "docm", "dot", "dotx", "odt", "ott", "rtf", "txt", "wpd", "wps", "hwp", "pages",
+    "xls", "xlsx", "xlsm", "xlsb", "ods", "numbers", "ppt", "pptx", "pptm", "pps", "ppsx", "odp", "key",
+    "odg", "pub", "vsd", "vsdx", "svg", "emf", "wmf",
+})  # fmt: skip
+register(ServerTool("convert-to-pdf", ANY_OFFICE, libreoffice, G, {"landscape": landscape, "pdfa": pdfa}))
 register(ServerTool("html-to-pdf", frozenset({"html", "htm"}), html_to_pdf, G,
                     {"paper": paper, "landscape": landscape, "background": Opt("bool", True)}, assets=True))
 register(ServerTool("url-to-pdf", frozenset(), url_to_pdf, G,

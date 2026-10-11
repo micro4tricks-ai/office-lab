@@ -2,7 +2,8 @@ import { inWorker } from '../workers/proxy';
 import type { Tool } from './types';
 
 const PDF = ['pdf', 'application/pdf'];
-const tool = (t: Omit<Tool, 'load' | 'runtime' | 'category' | 'from' | 'maxMB' | 'batch' | 'engine' | 'to'>): Tool => ({
+type Spec = Omit<Tool, 'load' | 'runtime' | 'category' | 'from' | 'maxMB' | 'batch' | 'engine' | 'to'> & Partial<Pick<Tool, 'engine' | 'load' | 'batch'>>;
+const tool = (t: Spec): Tool => ({
 	category: 'pdf',
 	runtime: 'browser',
 	from: PDF,
@@ -143,6 +144,166 @@ export const pdfExtraTools: Tool[] = [
 		i18n: {
 			ar: { title: 'إضافة رأس وتذييل للصفحات', desc: 'اكتب اسم الجهة والتاريخ ورقم الصفحة أعلى وأسفل كل صفحة، بالعربية أو الإنجليزية.', keywords: ['رأس الصفحة', 'تذييل', 'header', 'footer'] },
 			en: { title: 'Add header & footer', desc: 'Put your organisation, the date and the page number at the top and bottom of every page — Arabic or English.', keywords: ['header', 'footer', 'page header'] }
+		}
+	}),
+	tool({
+		id: 'redact-pdf',
+		engine: 'pdf-reshape',
+		load: inWorker('pdf-reshape'),
+		batch: false,
+		editor: 'place',
+		params: { action: 'redact', mode: 'redact' },
+		options: [{
+				id: 'dpi',
+				type: 'select',
+				label: { ar: 'الدقة', en: 'Resolution' },
+				default: '200',
+				choices: [
+					{ value: '150', label: { ar: '150 (ملف أصغر)', en: '150 DPI (smaller)' } },
+					{ value: '200', label: { ar: '200', en: '200 DPI' } },
+					{ value: '300', label: { ar: '300 (للطباعة)', en: '300 DPI (print)' } }
+				]
+			}],
+		i18n: {
+			ar: { title: 'إخفاء معلومات من PDF (تنقيح)', desc: 'غطِّ الأسماء والأرقام والمبالغ بمربعات سوداء قبل إرسال الملف. تُحذف المعلومة فعلًا: الصفحات المغطّاة تصبح صورًا فلا يمكن نسخ ما تحتها.', keywords: ['تنقيح', 'إخفاء', 'redact', 'حجب', 'سري', 'إخفاء بيانات'] },
+			en: { title: 'Redact PDF', desc: 'Black out names, numbers and amounts before sending a file. The text is really removed: covered pages become images, so nothing underneath can be copied.', keywords: ['redact', 'black out', 'hide text', 'censor', 'confidential'] }
+		}
+	}),
+	tool({
+		id: 'pdf-letterhead',
+		engine: 'pdf-reshape',
+		load: inWorker('pdf-reshape'),
+		params: { action: 'overlay' },
+		options: [
+			{ id: 'layer', type: 'image', accept: '.pdf,application/pdf,image/png,image/jpeg', label: { ar: 'ورق الشركة (PDF أو صورة)', en: 'Letterhead (PDF or image)' }, default: null },
+			{
+				id: 'position',
+				type: 'select',
+				label: { ar: 'المكان', en: 'Where' },
+				default: 'under',
+				choices: [
+					{ value: 'under', label: { ar: 'تحت النص (ورق رسمي)', en: 'Under the text (letterhead)' } },
+					{ value: 'over', label: { ar: 'فوق النص (ختم أو إطار)', en: 'Over the text (stamp or frame)' } }
+				]
+			},
+			{
+				id: 'pages',
+				type: 'select',
+				label: { ar: 'الصفحات', en: 'Pages' },
+				default: 'all',
+				choices: [
+					{ value: 'all', label: { ar: 'كل الصفحات', en: 'Every page' } },
+					{ value: 'first', label: { ar: 'الصفحة الأولى فقط', en: 'First page only' } }
+				]
+			}
+		],
+		i18n: {
+			ar: { title: 'طباعة على ورق الشركة (Letterhead)', desc: 'ضع ورق الشركة الرسمي (الشعار والعنوان والتذييل) خلف كل صفحات المستند، أو ضع ختمًا أو إطارًا فوقها.', keywords: ['ورق رسمي', 'letterhead', 'ترويسة', 'شعار الشركة', 'تراكب', 'overlay'] },
+			en: { title: 'Add letterhead to PDF', desc: 'Put your company letterhead (logo, address, footer) behind every page, or a stamp or frame on top.', keywords: ['letterhead', 'overlay pdf', 'stationery', 'background', 'company logo'] }
+		}
+	}),
+	tool({
+		id: 'pdf-page-size',
+		engine: 'pdf-reshape',
+		load: inWorker('pdf-reshape'),
+		params: { action: 'page-size' },
+		options: [
+			{
+				id: 'size',
+				type: 'select',
+				label: { ar: 'المقاس', en: 'Size' },
+				default: 'a4',
+				choices: [
+					{ value: 'a4', label: { ar: 'A4', en: 'A4' } },
+					{ value: 'a3', label: { ar: 'A3', en: 'A3' } },
+					{ value: 'a5', label: { ar: 'A5', en: 'A5' } },
+					{ value: 'letter', label: { ar: 'Letter', en: 'Letter' } },
+					{ value: 'legal', label: { ar: 'Legal', en: 'Legal' } }
+				]
+			},
+			{
+				id: 'orientation',
+				type: 'select',
+				label: { ar: 'الاتجاه', en: 'Orientation' },
+				default: 'auto',
+				choices: [
+					{ value: 'auto', label: { ar: 'حسب كل صفحة', en: 'Match each page' } },
+					{ value: 'portrait', label: { ar: 'طولي', en: 'Portrait' } },
+					{ value: 'landscape', label: { ar: 'عرضي', en: 'Landscape' } }
+				]
+			},
+			{ id: 'margin', type: 'number', label: { ar: 'الهامش', en: 'Margin' }, default: 0, min: 0, max: 50, unit: 'mm' }
+		],
+		i18n: {
+			ar: { title: 'تغيير مقاس صفحات PDF', desc: 'اجعل كل الصفحات A4 (أو A3 أو A5 أو Letter) مع الحفاظ على النسب، مثلًا قبل الطباعة أو الرفع على بوابة حكومية.', keywords: ['مقاس الصفحة', 'a4', 'تغيير حجم الصفحة', 'page size'] },
+			en: { title: 'Change PDF page size', desc: 'Make every page A4 (or A3, A5, Letter) keeping proportions — before printing or uploading to a portal.', keywords: ['page size', 'resize pdf pages', 'a4', 'letter'] }
+		}
+	}),
+	tool({
+		id: 'pdf-split-halves',
+		engine: 'pdf-reshape',
+		load: inWorker('pdf-reshape'),
+		params: { action: 'halve' },
+		options: [
+			{
+				id: 'direction',
+				type: 'select',
+				label: { ar: 'القص', en: 'Cut' },
+				default: 'vertical',
+				choices: [
+					{ value: 'vertical', label: { ar: 'يمين ويسار (كتاب مفتوح)', en: 'Left and right (open book)' } },
+					{ value: 'horizontal', label: { ar: 'أعلى وأسفل', en: 'Top and bottom' } }
+				]
+			},
+			{
+				id: 'order',
+				type: 'select',
+				label: { ar: 'الترتيب', en: 'Order' },
+				default: 'rtl',
+				when: { id: 'direction', in: ['vertical'] },
+				choices: [
+					{ value: 'rtl', label: { ar: 'اليمين أولًا (كتاب عربي)', en: 'Right first (Arabic book)' } },
+					{ value: 'ltr', label: { ar: 'اليسار أولًا', en: 'Left first' } }
+				]
+			}
+		],
+		i18n: {
+			ar: { title: 'قص صفحات PDF إلى نصفين', desc: 'حوّل صفحتين ممسوحتين معًا (كتاب مفتوح) إلى صفحتين منفصلتين، بترتيب الكتب العربية أو الإنجليزية.', keywords: ['قص الصفحة', 'نصفين', 'كتاب ممسوح', 'split pages'] },
+			en: { title: 'Split PDF pages in half', desc: 'Turn scanned two-page spreads into single pages, in Arabic (right first) or English order.', keywords: ['split pages in half', 'halve', 'scanned book', 'spread'] }
+		}
+	}),
+	tool({
+		id: 'flatten-pdf',
+		engine: 'pdf-reshape',
+		load: inWorker('pdf-reshape'),
+		params: { action: 'flatten' },
+		options: [
+			{
+				id: 'mode',
+				type: 'select',
+				label: { ar: 'ماذا يُثبَّت', en: 'Flatten' },
+				default: 'forms',
+				choices: [
+					{ value: 'forms', label: { ar: 'خانات النماذج فقط (يبقى النص قابلًا للنسخ)', en: 'Form fields only (text stays copyable)' } },
+					{ value: 'image', label: { ar: 'كل شيء — تحويل الصفحات إلى صور', en: 'Everything — pages become images' } }
+				]
+			},
+			{
+				id: 'dpi',
+				type: 'select',
+				label: { ar: 'الدقة', en: 'Resolution' },
+				default: '200',
+				when: { id: 'mode', in: ['image'] },
+				choices: [
+					{ value: '150', label: { ar: '150 (ملف أصغر)', en: '150 DPI (smaller)' } },
+					{ value: '200', label: { ar: '200', en: '200 DPI' } },
+					{ value: '300', label: { ar: '300 (للطباعة)', en: '300 DPI (print)' } }
+				]
+			}
+		],
+		i18n: {
+			ar: { title: 'تثبيت PDF (Flatten)', desc: 'ثبّت قيم النماذج والتعليقات حتى لا يمكن تعديلها، أو حوّل الصفحات إلى صور تمامًا مثل نسخة مطبوعة ممسوحة.', keywords: ['flatten', 'تثبيت', 'تسطيح', 'منع التعديل', 'تحويل pdf لصور'] },
+			en: { title: 'Flatten PDF', desc: 'Lock form values and comments so they can’t be changed, or turn the pages into images like a printed scan.', keywords: ['flatten pdf', 'rasterize pdf', 'lock form', 'print to image'] }
 		}
 	})
 ];

@@ -15,7 +15,8 @@ export type NoteKey =
 	| 'orientation-applied'
 	| 'target-missed'
 	| 'identical'
-	| 'ocr-limit';
+	| 'ocr-limit'
+	| 'no-form';
 
 export type ErrorCode =
 	| 'wrong-type'
@@ -71,13 +72,13 @@ export type OptionSpec = When &
 		| { id: string; type: 'checkbox'; label: Text; default: boolean }
 		| { id: string; type: 'text'; label: Text; default: string; secret?: boolean; required?: boolean; placeholder?: Text }
 		| { id: string; type: 'color'; label: Text; default: string }
-		/** A second file the tool needs (e.g. a logo); not a batch input. */
-		| { id: string; type: 'image'; label: Text; default: null }
+		/** A second file the tool needs (e.g. a logo); not a batch input. `accept`: input accept list (default images). */
+		| { id: string; type: 'image'; label: Text; default: null; accept?: string }
 	);
 
 type ToolText = { title: string; desc: string; keywords: string[] };
 
-export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode' | 'web-capture';
+export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode' | 'web-capture' | 'invoice' | 'password';
 
 export type Tool = {
 	id: string;

@@ -19,7 +19,7 @@ npm run dev
 
 <div dir="rtl">
 
-> الحالة الحالية: 91 أداة (73 في المتصفح و18 في نسخة الخادم). راجع `docs/PROGRESS.md` و`docs/FORMATS.md`.
+> الحالة الحالية: 100 أداة (80 في المتصفح و20 في نسخة الخادم). راجع `docs/PROGRESS.md` و`docs/FORMATS.md`.
 
 </div>
 

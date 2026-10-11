@@ -15,6 +15,16 @@ const options: OptionSpec[] = [
 		]
 	},
 	{
+		id: 'layout',
+		type: 'select',
+		label: { ar: 'شكل الصفحة', en: 'Page layout' },
+		default: 'block',
+		choices: [
+			{ value: 'block', label: { ar: 'نص عادي أو جدول (خطاب، فاتورة)', en: 'Plain text or table (letter, invoice)' } },
+			{ value: 'columns', label: { ar: 'أعمدة متعددة (جريدة، مجلة)', en: 'Several columns (newspaper, magazine)' } }
+		]
+	},
+	{
 		id: 'output',
 		type: 'select',
 		label: { ar: 'الناتج', en: 'Output' },

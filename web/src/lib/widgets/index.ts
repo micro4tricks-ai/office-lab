@@ -12,5 +12,7 @@ export const widgets: Partial<Record<WidgetKey, () => Promise<{ default: Widget 
 	vat: () => import('./VatCalculator.svelte'),
 	qr: () => import('./QrMaker.svelte'),
 	barcode: () => import('./BarcodeMaker.svelte'),
-	'web-capture': () => import('./WebCapture.svelte')
+	'web-capture': () => import('./WebCapture.svelte'),
+	invoice: () => import('./InvoiceMaker.svelte'),
+	password: () => import('./PasswordMaker.svelte')
 };

@@ -2,6 +2,7 @@ import type { Adapter } from '../../registry/types';
 import { decodeImage } from '../image/decode';
 import { encodeImage, encodePng } from '../image/encode';
 import { hasAlpha } from '../image/pixels';
+import { scanLook } from '../ocr/prepare';
 import { pdfLib, pdfOut, savePdf, withSuffix } from './lib';
 
 const MM = 72 / 25.4;
@@ -19,7 +20,8 @@ const adapter: Adapter = {
 		const margin = Math.max(0, Number(options.margin) || 0) * MM;
 		const quality = (Number(options.quality) || 90) / 100;
 		for (const [i, file] of inputs.entries()) {
-			const { image } = await decodeImage(file);
+			const decoded = (await decodeImage(file)).image;
+			const image = options.enhance === 'scan' ? scanLook(decoded) : decoded;
 			const embedded = hasAlpha(image)
 				? await doc.embedPng(await encodePng(image, false))
 				: await doc.embedJpg(await encodeImage(image, 'jpg', quality));

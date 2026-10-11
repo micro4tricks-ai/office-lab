@@ -99,6 +99,17 @@ async def to_word(job: Job) -> Path:
     return out
 
 
+async def to_excel(job: Job) -> Path:
+    await ensure_open(job)
+    out = job.out("xlsx")
+    code, _ = await run([sys.executable, str(SCRIPTS / "pdf_to_xlsx.py"), str(job.src), str(out)], job.dir, job.timeout)
+    if code == 3:
+        raise ToolError("nothing", "no table found")
+    if code != 0 or not out.exists():
+        raise ToolError("corrupted")
+    return out
+
+
 async def ocr(job: Job) -> Path:
     out = job.out("pdf")
     args = ["ocrmypdf", "-l", job.options["lang"], "--jobs", "1", "--output-type", "pdfa" if job.options["pdfa"] else "pdf",
@@ -125,6 +136,7 @@ register(ServerTool("compress-pdf-strong", P, compress, ("gs", "qpdf"), {
 }, timeout=300))
 register(ServerTool("repair-pdf", P, repair, ("qpdf", "gs")))
 register(ServerTool("pdf-to-word", P, to_word, ("qpdf",), timeout=300))
+register(ServerTool("pdf-to-excel", P, to_excel, ("qpdf",), timeout=300))
 register(ServerTool("ocr-pdf-server", P, ocr, ("ocrmypdf", "qpdf"), {
     "lang": Opt("choice", "ara+eng", ("ara", "eng", "ara+eng")),
     "redo": Opt("bool", False),

@@ -80,6 +80,45 @@ def test_powerpoint_to_pdf_one_page_per_slide(client):
         assert d.page_count == 2
     assert "تقرير الصيانة الشهري" in pdf_text(data)
 
+def test_convert_anything_to_pdf(client):
+    txt = "تقرير الصيانة الشهري" + chr(10) + "Office Lab" + chr(10)
+    txt = txt.encode("utf-8")
+    assert "تقرير الصيانة الشهري" in pdf_text(convert(client, "convert-to-pdf", ("notes.txt", txt)).content)
+    assert "Office Lab" in pdf_text(convert(client, "convert-to-pdf", "slides.pptx").content)
+    assert convert(client, "convert-to-pdf", ("x.exe", b"MZ"), expect=415).json() == {"code": "wrong-type"}
+
+
+def test_pdf_to_excel_tables(client):
+    from openpyxl import load_workbook
+
+    table_pdf = convert(client, "excel-to-pdf", "sales.xlsx").content
+    wb = load_workbook(io.BytesIO(convert(client, "pdf-to-excel", ("sales.pdf", table_pdf)).content))
+    cells = [c.value for ws in wb for row in ws.iter_rows() for c in row]
+    assert "فبراير" in cells and 2750 in cells
+    assert "الإجمالي" in cells  # the lam-alef + hamza ligature comes back in the right order
+    assert [c.value for c in wb.worksheets[0][1]] == ["الشهر", "المبلغ"]  # Arabic table: first column on the right
+    assert wb.worksheets[0].sheet_view.rightToLeft
+    assert convert(client, "pdf-to-excel", "text.pdf", expect=422).json() == {"code": "nothing"}
+
+
+def test_pdf_to_excel_never_writes_formulas(tmp_path):
+    """Text that looks like a formula in a PDF must land in Excel as plain text."""
+    import importlib.util
+
+    from openpyxl import Workbook, load_workbook
+
+    spec = importlib.util.spec_from_file_location("pdf_to_xlsx", Path(main.__file__).parent / "scripts" / "pdf_to_xlsx.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    wb = Workbook()
+    for i, text in enumerate(['=HYPERLINK("http://x","click")', "=1+1", "+cmd|' /C calc'!A0", "@SUM(1)"], start=1):
+        mod.put(wb.active, i, 1, mod.value(text))
+    wb.save(tmp_path / "f.xlsx")
+    back = load_workbook(tmp_path / "f.xlsx").active
+    assert [c.data_type for c in back["A"]] == ["s"] * 4
+    assert back["A1"].value.startswith("=HYPERLINK")
+
+
 def test_word_to_pdfa(client):
     assert b"pdfaid" in convert(client, "word-to-pdf", "report.docx", {"pdfa": True}).content
 

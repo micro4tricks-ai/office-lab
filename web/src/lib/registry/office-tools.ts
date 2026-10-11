@@ -18,6 +18,10 @@ export const widgetTool = (id: string, key: WidgetKey, category: Tool['category'
 });
 
 export const officeTools: Tool[] = [
+	widgetTool('invoice-maker', 'invoice', 'office', {
+		ar: { title: 'إنشاء فاتورة PDF', desc: 'فاتورة عربية جاهزة للطباعة: الأصناف والخصم وضريبة القيمة المضافة والإجمالي بالحروف، وشعار شركتك، ورمز QR لهيئة الزكاة (السعودية).', keywords: ['فاتورة', 'فاتورة ضريبية', 'invoice', 'عرض سعر', 'زاتكا', 'فاتورة إلكترونية'] },
+		en: { title: 'Invoice maker (PDF)', desc: 'A print-ready Arabic/English invoice: items, discount, VAT, total in words, your logo, and the Saudi ZATCA QR code.', keywords: ['invoice', 'tax invoice', 'invoice generator', 'zatca', 'arabic invoice'] }
+	}),
 	widgetTool('tafqeet', 'tafqeet', 'office', {
 		ar: { title: 'تفقيط المبالغ (المبلغ بالحروف)', desc: 'اكتب المبلغ واحصل عليه بالحروف للفواتير والشيكات: «فقط ألف وخمسمائة جنيه مصري لا غير» — بالجنيه والريال والدرهم والدينار والدولار.', keywords: ['تفقيط', 'المبلغ بالحروف', 'كتابة الأرقام', 'شيكات', 'فواتير'] },
 		en: { title: 'Amount in words (Arabic tafqeet)', desc: 'Turn an amount into Arabic and English words for invoices and cheques — EGP, SAR, AED, KWD, USD, EUR.', keywords: ['tafqeet', 'number to words', 'arabic', 'cheque', 'invoice'] }

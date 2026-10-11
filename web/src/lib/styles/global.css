@@ -26,7 +26,8 @@
 	--space-6: 1.5rem;
 	--space-8: 2rem;
 	--space-12: 3rem;
-	--maxw: 72rem;
+	/* Fills wide screens too (cap ≈ 1900px at the largest root size). */
+	--maxw: 106rem;
 	--tap: 44px;
 
 	color-scheme: light;
@@ -80,6 +81,8 @@
 
 html {
 	-webkit-text-size-adjust: 100%;
+	/* Grows a little with the screen (16px on phones/laptops → 18px on big monitors); every size is in rem. */
+	font-size: clamp(100%, 0.8rem + 0.3vw, 112.5%);
 }
 
 body {
@@ -133,7 +136,7 @@ select {
 	width: 100%;
 	max-width: var(--maxw);
 	margin-inline: auto;
-	padding-inline: var(--space-4);
+	padding-inline: clamp(var(--space-4), 3vw, 3.5rem);
 }
 
 .btn {
