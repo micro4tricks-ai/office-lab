@@ -29,5 +29,6 @@ MSYS_NO_PATHCONV=1 BASE_PATH=/office-lab npx playwright test   # e2e (needs a bu
 ```
 
 ## Deploy
-- Push to `main` → `.github/workflows/pages.yml` → https://micro4tricks-ai.github.io/office-lab/
+- Push to `main` → CI (`ci.yml`) → only if green, `pages.yml` deploys → https://micro4tricks-ai.github.io/office-lab/
+- Runners pinned to `ubuntu-24.04` (not `ubuntu-latest`) so image migrations do not break CI by surprise.
 - `PUBLIC_API_URL` empty = no server; server tools show «متاحة في نسخة الخادم».
