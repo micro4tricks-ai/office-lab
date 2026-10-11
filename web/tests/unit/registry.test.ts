@@ -28,13 +28,13 @@ describe('registry', () => {
 	});
 
 	it('every engine exists and its adapter loads', async () => {
-		for (const t of tools.filter((x) => !x.widget)) {
+		for (const t of tools.filter((x) => !x.widget && x.runtime === 'browser')) {
 			expect(engines[t.engine], t.engine).toBeTypeOf('function');
 			const a = await engines[t.engine]();
 			expect(a.convert, t.engine).toBeTypeOf('function');
 			expect(t.load, t.id).toBeTypeOf('function');
 		}
-	});
+	}, 30_000); // loads every engine: slow on a cold transform cache
 
 	it('no option shadows a key the runner adds itself (uiLang)', () => {
 		for (const t of tools) for (const o of t.options ?? []) expect(o.id, t.id).not.toBe('uiLang');

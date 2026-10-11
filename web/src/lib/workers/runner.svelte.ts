@@ -100,6 +100,8 @@ export function createRunner() {
 		} catch {
 			throw new ConvertError('corrupted');
 		}
+		// Server tools are a network request, not worker work.
+		if (tool.runtime === 'server') return (await tool.load()).convert(input, mergedOptions(tool, options), progress);
 		return runData(tool.engine, input, mergedOptions(tool, options), progress);
 	}
 

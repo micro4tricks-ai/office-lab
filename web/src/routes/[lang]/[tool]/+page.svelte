@@ -42,20 +42,20 @@
 		{/if}
 	</header>
 
-	{#if tool.widget && widgets[tool.widget]}
-		{#key tool.id}
-			{#await widgets[tool.widget]!() then mod}
-				<mod.default {lang} />
-			{/await}
-		{/key}
-	{:else if usable}
-		{#key tool.id}
-			<ToolRunner {tool} {lang} />
-		{/key}
-	{:else}
+	{#if !usable}
 		<p class="server-note" role="note">
 			<Icon name="server" />{t(lang, 'tool.serverOnly')}
 		</p>
+	{:else if tool.widget && widgets[tool.widget]}
+		{#key tool.id}
+			{#await widgets[tool.widget]!() then mod}
+				<mod.default {lang} {tool} />
+			{/await}
+		{/key}
+	{:else}
+		{#key tool.id}
+			<ToolRunner {tool} {lang} />
+		{/key}
 	{/if}
 </div>
 
