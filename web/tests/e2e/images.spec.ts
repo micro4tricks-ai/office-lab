@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { unzipSync } from 'fflate';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -37,12 +38,14 @@ test.describe('image tools', () => {
 	test('every input format converts to PNG (orientation applied)', async ({ page }) => {
 		await convert(page, 'convert-to-png', ALL_INPUTS);
 		await expect(page.locator('[data-status="done"]')).toHaveCount(ALL_INPUTS.length);
-		// Rows keep the input order; several inputs share a name (photo.*), so download row by row.
-		const rows = page.locator('[data-status="done"]');
+		// One ZIP instead of 11 downloads: Chromium stops a page's programmatic downloads after ten.
+		// Entries keep the input order (duplicate names become "photo (2).png"…).
+		const dl = page.waitForEvent('download');
+		await page.getByRole('button', { name: 'Download all (ZIP)' }).click();
+		const entries = Object.entries(unzipSync(readFileSync((await (await dl).path())!)));
+		expect(entries).toHaveLength(ALL_INPUTS.length);
 		for (const [i, f] of ALL_INPUTS.entries()) {
-			const dl = page.waitForEvent('download');
-			await rows.nth(i).getByRole('button', { name: /^Download / }).click();
-			const out = readFileSync((await (await dl).path())!);
+			const out = Buffer.from(entries[i][1]);
 			expect(starts(out, magic.png), f).toBe(true);
 			if (f === 'photo.jpg') expect(pngSize(out)).toEqual([128, 96]); // stored sideways, EXIF says rotate
 		}
