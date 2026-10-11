@@ -83,6 +83,12 @@ export async function rowsOf(ws: import('xlsx').WorkSheet): Promise<unknown[][]>
 	return X.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '', raw: false, blankrows: false });
 }
 
+/** Rows with real values (numbers stay numbers, dates stay dates) — for writing Excel back. */
+export async function rawRowsOf(ws: import('xlsx').WorkSheet): Promise<unknown[][]> {
+	const X = await sheetjs();
+	return X.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '', raw: true, blankrows: false });
+}
+
 /** Sheets to export: all, or just the first. */
 export function pickSheets(wb: import('xlsx').WorkBook, which: unknown) {
 	const names = which === 'first' ? wb.SheetNames.slice(0, 1) : wb.SheetNames;

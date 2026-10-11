@@ -1,5 +1,6 @@
 import { inWorker } from '../workers/proxy';
 import { imageTools } from './image-tools';
+import { dataExtraTools } from './data-extra-tools';
 import { dataTools } from './data-tools';
 import { docTools } from './doc-tools';
 import { ocrTools } from './ocr-tools';
@@ -15,6 +16,7 @@ export const tools: Tool[] = [
 	...pdfExtraTools,
 	...imageTools,
 	...dataTools,
+	...dataExtraTools,
 	...docTools,
 	...ocrTools,
 	...officeTools,
