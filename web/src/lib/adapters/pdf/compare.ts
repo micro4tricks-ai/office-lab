@@ -24,7 +24,7 @@ const adapter: Adapter = {
 			await doc.loadingTask.destroy();
 			progress?.(texts.length / 3);
 		}
-		const ar = options.lang === 'ar';
+		const ar = options.uiLang === 'ar';
 		const L = LABELS[ar ? 'ar' : 'en'];
 		let changed = 0;
 		const sections: string[] = [];

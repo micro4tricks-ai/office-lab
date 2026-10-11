@@ -28,3 +28,5 @@ vite.config.ts.timestamp-*
 
 # Copied by scripts/copy-assets.mjs
 /static/pdfjs
+/static/pagedjs
+/static/tesseract

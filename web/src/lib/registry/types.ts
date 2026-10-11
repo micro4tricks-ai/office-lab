@@ -1,8 +1,8 @@
 export type Lang = 'ar' | 'en';
 export const LANGS: Lang[] = ['ar', 'en'];
 
-export type Category = 'image' | 'pdf' | 'document' | 'data' | 'ebook' | 'media' | 'ocr';
-export const CATEGORIES: Category[] = ['image', 'pdf', 'document', 'data', 'ebook', 'media', 'ocr'];
+export type Category = 'image' | 'pdf' | 'document' | 'data' | 'office' | 'files' | 'ebook' | 'media' | 'ocr';
+export const CATEGORIES: Category[] = ['pdf', 'image', 'document', 'data', 'office', 'ocr', 'files', 'ebook', 'media'];
 
 /** A file as it crosses the worker boundary. `note` is an optional i18n key shown with a result. */
 export type FileData = { name: string; type: string; bytes: Uint8Array; note?: NoteKey };
@@ -14,7 +14,8 @@ export type NoteKey =
 	| 'no-metadata'
 	| 'orientation-applied'
 	| 'target-missed'
-	| 'identical';
+	| 'identical'
+	| 'ocr-limit';
 
 export type ErrorCode = 'wrong-type' | 'too-big' | 'password' | 'corrupted' | 'pages' | 'nothing' | 'unknown';
 
@@ -64,6 +65,8 @@ export type OptionSpec = When &
 
 type ToolText = { title: string; desc: string; keywords: string[] };
 
+export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode';
+
 export type Tool = {
 	id: string;
 	category: Category;
@@ -84,5 +87,7 @@ export type Tool = {
 	combine?: { min: number; max?: number };
 	/** An interactive step before converting; it writes options.plan / .items / .fields. */
 	editor?: 'organize' | 'place' | 'form';
+	/** A page of its own instead of the file runner (editors, calculators, generators). */
+	widget?: WidgetKey;
 	i18n: Record<Lang, ToolText>;
 };

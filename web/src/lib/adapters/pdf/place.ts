@@ -8,7 +8,7 @@ export function visualSize(page: PDFPage) {
 }
 
 /** Visual point (origin bottom-left of what the reader sees) → the page's own coordinates. */
-function toUser(page: PDFPage, vx: number, vy: number) {
+export function toUser(page: PDFPage, vx: number, vy: number) {
 	const box = page.getCropBox();
 	const { rot } = visualSize(page);
 	const [W, H] = [box.width, box.height];

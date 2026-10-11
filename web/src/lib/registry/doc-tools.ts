@@ -1,0 +1,82 @@
+import { inWorker } from '../workers/proxy';
+import type { OptionSpec, Tool } from './types';
+
+const DOCX = ['docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
+const images: OptionSpec = {
+	id: 'images',
+	type: 'select',
+	label: { ar: 'الصور', en: 'Images' },
+	default: 'embed',
+	choices: [
+		{ value: 'embed', label: { ar: 'داخل الملف نفسه', en: 'Inside the file' } },
+		{ value: 'files', label: { ar: 'ملفات منفصلة (ZIP)', en: 'Separate files (ZIP)' } }
+	]
+};
+
+type Base = Omit<Tool, 'load' | 'runtime' | 'category' | 'maxMB' | 'batch'>;
+const doc = (t: Base): Tool => ({ category: 'document', runtime: 'browser', maxMB: 50, batch: true, ...t, load: inWorker(t.engine) });
+
+const MD = ['md', 'markdown', 'txt', 'text/markdown', 'text/plain'];
+
+export const docTools: Tool[] = [
+	doc({
+		id: 'markdown-to-pdf',
+		from: MD,
+		to: ['pdf'],
+		engine: 'markdown',
+		widget: 'markdown',
+		params: { to: 'html' },
+		i18n: {
+			ar: { title: 'Markdown إلى PDF بالعربية', desc: 'محرر بمعاينة حية: اكتب بالعربية والإنجليزية، واختر قالب تقرير أو سيرة ذاتية أو خطاب، واحفظ PDF بتشكيل عربي سليم.', keywords: ['markdown', 'pdf', 'محرر', 'تقرير', 'سيرة ذاتية', 'خطاب'] },
+			en: { title: 'Markdown to PDF (Arabic-ready)', desc: 'A live editor: write in Arabic and English, pick a report, CV or letter template, and save a PDF with proper Arabic.', keywords: ['markdown', 'pdf', 'editor', 'report', 'cv', 'letter'] }
+		}
+	}),
+	doc({
+		id: 'markdown-to-html',
+		from: MD,
+		to: ['html'],
+		engine: 'markdown',
+		params: { to: 'html' },
+		options: [{ id: 'toc', type: 'checkbox', label: { ar: 'إضافة فهرس المحتويات', en: 'Add a table of contents' }, default: false }],
+		i18n: {
+			ar: { title: 'Markdown إلى HTML', desc: 'صفحة HTML واحدة منسقة، مع الجداول والمعادلات وتلوين الأكواد.', keywords: ['markdown', 'html', 'md'] },
+			en: { title: 'Markdown to HTML', desc: 'One styled HTML page, with tables, math and highlighted code.', keywords: ['markdown', 'html', 'md'] }
+		}
+	}),
+	doc({
+		id: 'markdown-to-word',
+		from: MD,
+		to: ['docx'],
+		engine: 'markdown',
+		params: { to: 'docx' },
+		i18n: {
+			ar: { title: 'Markdown إلى Word', desc: 'مستند Word بالعناوين والقوائم والجداول، والفقرات العربية من اليمين لليسار.', keywords: ['markdown', 'word', 'docx', 'وورد'] },
+			en: { title: 'Markdown to Word', desc: 'A Word document with headings, lists and tables; Arabic paragraphs right-to-left.', keywords: ['markdown', 'word', 'docx'] }
+		}
+	}),
+	doc({
+		id: 'word-to-html',
+		from: DOCX,
+		to: ['html'],
+		engine: 'docx',
+		params: { to: 'html' },
+		options: [images],
+		i18n: {
+			ar: { title: 'تحويل Word إلى HTML', desc: 'صفحة ويب نظيفة من مستند Word، مع العناوين والقوائم والجداول والصور، والعربي من اليمين.', keywords: ['word', 'docx', 'html', 'وورد'] },
+			en: { title: 'Word to HTML', desc: 'A clean web page from a Word document — headings, lists, tables, images; Arabic stays right-to-left.', keywords: ['word', 'docx', 'html'] }
+		}
+	}),
+	doc({
+		id: 'word-to-markdown',
+		from: DOCX,
+		to: ['md'],
+		engine: 'docx',
+		params: { to: 'md' },
+		options: [{ ...images, default: 'files' }],
+		i18n: {
+			ar: { title: 'تحويل Word إلى Markdown', desc: 'حوّل مستند Word إلى Markdown للمواقع والتوثيق وGitHub.', keywords: ['word', 'docx', 'markdown', 'md', 'وورد'] },
+			en: { title: 'Word to Markdown', desc: 'Turn a Word document into Markdown for sites, docs and GitHub.', keywords: ['word', 'docx', 'markdown', 'md'] }
+		}
+	})
+];

@@ -1,39 +1,54 @@
-# Supported formats
+# Supported tools and formats
 
-> Generated from `web/src/lib/registry/tools.ts` (generator arrives in Phase 5 — until then, keep in sync by hand).
+> From `web/src/lib/registry/` (a generator comes in Phase 5 — until then, keep in sync by hand).
+> Everything below runs in the browser; nothing is uploaded. 73 tools.
 
-Image inputs (all image tools unless noted): JPG/JPEG/JFIF, PNG, WebP, AVIF, GIF (first frame), BMP, TIFF, SVG, ICO, HEIC/HEIF, JXL.
+Image inputs: JPG/JPEG/JFIF, PNG, WebP, AVIF, GIF (first frame), BMP, TIFF, SVG, ICO, HEIC/HEIF, JXL.
+Spreadsheet inputs: XLSX, XLSM, XLS, ODS, CSV/TSV (UTF-8 or Windows-1256), JSON arrays.
 
-| Tool | From | To | Runs |
-|---|---|---|---|
-| `convert-to-jpg` | images | JPG | browser |
-| `convert-to-png` | images | PNG | browser |
-| `convert-to-webp` | images | WebP | browser |
-| `convert-to-avif` | images | AVIF | browser |
-| `convert-to-ico` | images | ICO (16–256) | browser |
-| `heic-to-jpg` | HEIC/HEIF | JPG | browser |
-| `compress-image` | images | same / JPG / WebP / AVIF | browser |
-| `resize-image` | images | same / JPG / WebP / PNG / AVIF | browser |
-| `crop-rotate-image` | images | same | browser |
-| `remove-image-metadata` | JPG, PNG, WebP | same (lossless) | browser |
-| `watermark-image` | images | same | browser |
-| `favicon-generator` | images | ICO + PNG set + manifest + HTML | browser |
-| `image-to-svg` | images | SVG | browser |
-| `merge-pdf` | PDF ×2+ | PDF | browser |
-| `split-pdf` | PDF | PDF (several) | browser |
-| `extract-pdf-pages` / `delete-pdf-pages` / `rotate-pdf` | PDF | PDF | browser |
-| `organize-pdf` | PDF | PDF (reorder/rotate/delete, visual) | browser |
-| `crop-pdf` | PDF | PDF | browser |
-| `pdf-page-numbers` | PDF | PDF | browser |
-| `watermark-pdf` | PDF | PDF | browser |
-| `sign-pdf` / `edit-pdf` | PDF | PDF (signature, text, images placed visually) | browser |
-| `fill-pdf-form` | PDF | PDF (filled, optionally flattened) | browser |
-| `image-to-pdf` | images ×1+ | PDF (one file, A4/Letter/fit) | browser |
-| `pdf-to-image` | PDF | JPG / PNG / WebP | browser |
-| `extract-pdf-images` | PDF | PNG / JPG | browser |
-| `pdf-to-text` | PDF | TXT | browser |
-| `compress-pdf` | PDF | PDF | browser |
-| `compare-pdf` | PDF ×2 | HTML report | browser |
-| `protect-pdf` / `unlock-pdf` | PDF | PDF | browser |
-| `pdf-metadata` | PDF | PDF | browser |
-| `txt-to-html` | TXT | HTML | browser |
+## PDF (26)
+| Tool | In → Out |
+|---|---|
+| `merge-pdf` | PDF ×2+ → PDF (reorderable) |
+| `split-pdf` · `extract-pdf-pages` · `delete-pdf-pages` · `rotate-pdf` · `organize-pdf` | PDF → PDF |
+| `crop-pdf` · `pdf-page-numbers` · `watermark-pdf` · `pdf-header-footer` · `pdf-add-blank-pages` | PDF → PDF |
+| `sign-pdf` · `edit-pdf` · `fill-pdf-form` | PDF → PDF (visual editors) |
+| `pdf-n-up` · `pdf-booklet` · `pdf-grayscale` · `compress-pdf` | PDF → PDF |
+| `protect-pdf` · `unlock-pdf` · `pdf-metadata` | PDF → PDF |
+| `image-to-pdf` | images ×1+ → PDF |
+| `pdf-to-image` | PDF → JPG / PNG / WebP |
+| `extract-pdf-images` | PDF → PNG / JPG |
+| `pdf-to-text` | PDF → TXT |
+| `compare-pdf` | PDF ×2 → HTML report |
+
+## Images (13)
+`convert-to-jpg` · `convert-to-png` · `convert-to-webp` · `convert-to-avif` · `convert-to-ico` · `heic-to-jpg` ·
+`compress-image` · `resize-image` · `crop-rotate-image` · `remove-image-metadata` · `watermark-image` ·
+`favicon-generator` (ICO + PNG set + manifest) · `image-to-svg`
+
+## Documents (6)
+| Tool | In → Out |
+|---|---|
+| `markdown-to-pdf` | Markdown editor → PDF via print (4 templates, Arabic) |
+| `markdown-to-html` · `markdown-to-word` | MD → HTML / DOCX |
+| `word-to-html` · `word-to-markdown` | DOCX → HTML / MD |
+| `txt-to-html` | TXT → HTML |
+
+## Data & spreadsheets (16)
+| Tool | In → Out |
+|---|---|
+| `excel-to-csv` · `excel-to-json` · `excel-to-html` · `excel-to-markdown` · `excel-to-sql` | sheets → CSV / JSON / HTML / MD / SQL |
+| `convert-to-excel` | CSV / JSON / ODS / XLS → XLSX |
+| `convert-to-json` · `convert-to-yaml` · `convert-to-xml` · `convert-to-toml` | JSON ↔ YAML ↔ XML ↔ TOML |
+| `merge-excel` · `split-excel` · `remove-duplicates` · `clean-data` | sheets → XLSX |
+| `excel-to-vcard` · `vcard-to-excel` | contacts ↔ VCF |
+
+## OCR (2)
+`ocr-image` · `ocr-pdf` (≤20 pages) — Arabic, English or both → TXT or searchable PDF.
+
+## Office tools (7)
+`tafqeet` (amount in Arabic/English words) · `hijri-date` · `arabic-text` · `vat-calculator` ·
+`qr-code` · `read-qr` · `barcode`
+
+## Files (3)
+`create-zip` · `extract-zip` · `batch-rename`

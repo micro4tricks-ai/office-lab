@@ -6,6 +6,7 @@
 	import { serverCapabilities } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
 	import { toolById } from '#lib/registry/tools.ts';
+	import { widgets } from '#lib/widgets/index.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -26,7 +27,7 @@
 	<meta name="keywords" content={text.keywords.join(', ')} />
 </svelte:head>
 
-<div class="container page">
+<div class="container page" class:wide={tool.widget === 'markdown'}>
 	<nav class="crumbs" aria-label={t(lang, 'nav.home')}>
 		<a href={resolve('/[lang]', { lang }) + '/'}>{t(lang, 'nav.home')}</a>
 		<span aria-hidden="true">/</span>
@@ -41,7 +42,13 @@
 		{/if}
 	</header>
 
-	{#if usable}
+	{#if tool.widget && widgets[tool.widget]}
+		{#key tool.id}
+			{#await widgets[tool.widget]!() then mod}
+				<mod.default {lang} />
+			{/await}
+		{/key}
+	{:else if usable}
 		{#key tool.id}
 			<ToolRunner {tool} {lang} />
 		{/key}
@@ -58,6 +65,9 @@
 		padding-block: var(--space-6) var(--space-12);
 		display: grid;
 		gap: var(--space-6);
+	}
+	.page.wide {
+		max-width: var(--maxw);
 	}
 	.crumbs {
 		display: flex;

@@ -160,6 +160,19 @@
 		cursor: pointer;
 		font-weight: 600;
 	}
+	/* Phones: one swipeable row instead of four rows of chips before the first tool. */
+	@media (max-width: 600px) {
+		.chips {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			margin-inline: calc(-1 * var(--space-4));
+			padding: 2px var(--space-4) var(--space-2);
+			scrollbar-width: none;
+		}
+		.chips button {
+			flex: none;
+		}
+	}
 	.chips button[aria-pressed='true'] {
 		background: var(--accent);
 		border-color: var(--accent);

@@ -6,7 +6,7 @@ const ext = (name: string) => name.split('.').pop()?.toLowerCase() ?? '';
 
 /** Checks done on the main thread before a file is sent to a worker. */
 export function validate(tool: Tool, file: File): ConvertError | null {
-	if (!tool.from.includes(ext(file.name)) && !tool.from.includes(file.type)) {
+	if (!tool.from.includes('*') && !tool.from.includes(ext(file.name)) && !tool.from.includes(file.type)) {
 		return new ConvertError('wrong-type');
 	}
 	if (file.size > tool.maxMB * 1024 * 1024) return new ConvertError('too-big');
@@ -15,7 +15,7 @@ export function validate(tool: Tool, file: File): ConvertError | null {
 
 /** Accept attribute for <input type=file>. */
 export const acceptOf = (tool: Tool) =>
-	tool.from.map((f) => (f.includes('/') ? f : '.' + f)).join(',');
+	tool.from.includes('*') ? '' : tool.from.map((f) => (f.includes('/') ? f : '.' + f)).join(',');
 
 /** Parallel workers: leave a core for the page, and stay gentle on small phones. */
 function poolSize() {
