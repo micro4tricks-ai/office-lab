@@ -20,7 +20,7 @@ self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
 		const files = await adapter.convert(file, options, (ratio) =>
 			post({ id, kind: 'progress', ratio })
 		);
-		post({ id, kind: 'done', files }, files.map((f) => f.bytes.buffer as ArrayBuffer));
+		post({ id, kind: 'done', files }, [...new Set(files.map((f) => f.bytes.buffer as ArrayBuffer))]);
 	} catch (e) {
 		const code = e instanceof ConvertError ? e.code : 'unknown';
 		post({ id, kind: 'error', code, message: e instanceof Error ? e.message : String(e) });

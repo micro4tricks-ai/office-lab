@@ -1,5 +1,6 @@
 import { ConvertError, type FileData, type Options, type Tool } from '../registry/types';
 import type { WorkerRequest, WorkerResponse } from './convert.worker';
+import { prepare } from './prepare';
 
 const ext = (name: string) => name.split('.').pop()?.toLowerCase() ?? '';
 
@@ -16,53 +17,96 @@ export function validate(tool: Tool, file: File): ConvertError | null {
 export const acceptOf = (tool: Tool) =>
 	tool.from.map((f) => (f.includes('/') ? f : '.' + f)).join(',');
 
+/** Parallel workers: leave a core for the page, and stay gentle on small phones. */
+function poolSize() {
+	const cores = navigator.hardwareConcurrency || 2;
+	const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+	return Math.max(1, Math.min(memory <= 4 ? 2 : 3, cores - 1));
+}
+
+type Job = {
+	req: WorkerRequest;
+	transfer: Transferable[];
+	resolve: (f: FileData[]) => void;
+	reject: (e: ConvertError) => void;
+	progress?: (r: number) => void;
+};
+
 /**
- * Runs conversions one by one in a dedicated worker, so the UI never freezes.
+ * Runs conversions in a small pool of workers, so the UI never freezes.
  * Call `dispose()` when finished.
  */
 export function createRunner() {
-	let worker: Worker | null = null;
+	const size = poolSize();
+	const idle: Worker[] = [];
+	const busy = new Map<Worker, Job>();
+	const queue: Job[] = [];
+	let created = 0;
 	let seq = 0;
-	const pending = new Map<
-		number,
-		{ resolve: (f: FileData[]) => void; reject: (e: ConvertError) => void; progress?: (r: number) => void }
-	>();
 
-	function getWorker() {
-		if (worker) return worker;
-		worker = new Worker(new URL('./convert.worker.ts', import.meta.url), { type: 'module' });
-		worker.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
-			const job = pending.get(data.id);
-			if (!job) return;
+	function spawn() {
+		const w = new Worker(new URL('./convert.worker.ts', import.meta.url), { type: 'module' });
+		w.onmessage = ({ data }: MessageEvent<WorkerResponse>) => {
+			const job = busy.get(w);
+			if (!job || job.req.id !== data.id) return;
 			if (data.kind === 'progress') return job.progress?.(data.ratio);
-			pending.delete(data.id);
+			busy.delete(w);
 			if (data.kind === 'done') job.resolve(data.files);
 			else job.reject(new ConvertError(data.code, data.message));
+			idle.push(w);
+			pump();
 		};
-		return worker;
+		w.onerror = (e) => {
+			// A crashed worker (e.g. out of memory) fails its job and is replaced.
+			const job = busy.get(w);
+			busy.delete(w);
+			w.terminate();
+			created--;
+			job?.reject(new ConvertError('unknown', e.message));
+			pump();
+		};
+		created++;
+		return w;
 	}
 
-	async function run(tool: Tool, file: File, options: Options, progress?: (r: number) => void) {
-		const bytes = new Uint8Array(await file.arrayBuffer());
-		const id = ++seq;
-		const req: WorkerRequest = {
-			id,
-			engine: tool.engine,
-			file: { name: file.name, type: file.type, bytes },
-			options: $state.snapshot(options) as Options
-		};
+	function pump() {
+		while (queue.length) {
+			const w = idle.pop() ?? (created < size ? spawn() : null);
+			if (!w) return;
+			const job = queue.shift()!;
+			busy.set(w, job);
+			w.postMessage(job.req, job.transfer);
+		}
+	}
+
+	/** Runs one engine on bytes already in memory. */
+	function runData(engine: string, input: FileData, options: Options, progress?: (r: number) => void) {
+		const req: WorkerRequest = { id: ++seq, engine, file: input, options };
 		return new Promise<FileData[]>((resolve, reject) => {
-			pending.set(id, { resolve, reject, progress });
-			getWorker().postMessage(req, [bytes.buffer]);
+			queue.push({ req, transfer: [input.bytes.buffer], resolve, reject, progress });
+			pump();
 		});
 	}
 
-	function dispose() {
-		worker?.terminate();
-		worker = null;
-		for (const job of pending.values()) job.reject(new ConvertError('unknown', 'cancelled'));
-		pending.clear();
+	/** Runs a tool on a picked file: prepares it (SVG → PNG), merges fixed params under the user's options. */
+	async function run(tool: Tool, file: File, options: Options, progress?: (r: number) => void) {
+		let input: FileData;
+		try {
+			input = await prepare(file);
+		} catch {
+			throw new ConvertError('corrupted');
+		}
+		return runData(tool.engine, input, { ...tool.params, ...($state.snapshot(options) as Options) }, progress);
 	}
 
-	return { run, dispose };
+	function dispose() {
+		for (const w of [...idle, ...busy.keys()]) w.terminate();
+		for (const job of [...busy.values(), ...queue]) job.reject(new ConvertError('unknown', 'cancelled'));
+		idle.length = 0;
+		busy.clear();
+		queue.length = 0;
+		created = 0;
+	}
+
+	return { run, runData, dispose, size };
 }

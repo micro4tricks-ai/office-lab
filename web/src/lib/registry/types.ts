@@ -4,8 +4,11 @@ export const LANGS: Lang[] = ['ar', 'en'];
 export type Category = 'image' | 'pdf' | 'document' | 'data' | 'ebook' | 'media' | 'ocr';
 export const CATEGORIES: Category[] = ['image', 'pdf', 'document', 'data', 'ebook', 'media', 'ocr'];
 
-/** A file as it crosses the worker boundary. */
-export type FileData = { name: string; type: string; bytes: Uint8Array };
+/** A file as it crosses the worker boundary. `note` is an optional i18n key shown with a result. */
+export type FileData = { name: string; type: string; bytes: Uint8Array; note?: NoteKey };
+
+/** Short remarks an adapter can attach to an output (keys in i18n `note.*`). */
+export type NoteKey = 'kept-original' | 'metadata-removed' | 'no-metadata' | 'orientation-applied' | 'target-missed';
 
 export type ErrorCode = 'wrong-type' | 'too-big' | 'password' | 'corrupted' | 'unknown';
 
@@ -18,7 +21,8 @@ export class ConvertError extends Error {
 	}
 }
 
-export type Options = Record<string, string | number | boolean>;
+export type OptionValue = string | number | boolean | FileData | null;
+export type Options = Record<string, OptionValue>;
 
 /** Every engine sits behind this, so any library can be swapped later. */
 export type Adapter = {
@@ -27,11 +31,19 @@ export type Adapter = {
 
 type Text = { ar: string; en: string };
 
-export type OptionSpec =
-	| { id: string; type: 'select'; label: Text; default: string; choices: { value: string; label: Text }[] }
-	| { id: string; type: 'range' | 'number'; label: Text; default: number; min: number; max: number; step?: number }
-	| { id: string; type: 'checkbox'; label: Text; default: boolean }
-	| { id: string; type: 'text'; label: Text; default: string };
+/** Show an option only while another option has one of these values. */
+type When = { when?: { id: string; in: (string | number | boolean)[] } };
+
+export type OptionSpec = When &
+	(
+		| { id: string; type: 'select'; label: Text; default: string; choices: { value: string; label: Text }[] }
+		| { id: string; type: 'range' | 'number'; label: Text; default: number; min: number; max: number; step?: number; unit?: string }
+		| { id: string; type: 'checkbox'; label: Text; default: boolean }
+		| { id: string; type: 'text'; label: Text; default: string }
+		| { id: string; type: 'color'; label: Text; default: string }
+		/** A second file the tool needs (e.g. a logo); not a batch input. */
+		| { id: string; type: 'image'; label: Text; default: null }
+	);
 
 type ToolText = { title: string; desc: string; keywords: string[] };
 
@@ -46,6 +58,8 @@ export type Tool = {
 	/** Adapter name, a key of `engines` in lib/adapters. */
 	engine: string;
 	load: () => Promise<Adapter>;
+	/** Fixed options for this tool, merged under the user's (lets one engine serve several tools). */
+	params?: Options;
 	options?: OptionSpec[];
 	maxMB: number;
 	batch: boolean;

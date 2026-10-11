@@ -27,5 +27,12 @@ Current phase: 1 — Images
 - Font: Cairo (variable) self-hosted from `@fontsource-variable/cairo`.
 - Lighthouse run locally with Edge (Chrome isn't installed on this PC).
 
+## Phase 1 status (WIP on branch `phase-1-images`, 2026-10-11)
+- Done: 14 image tools in `registry/image-tools.ts` (convert to JPG/PNG/WebP/AVIF/ICO/PDF, HEIC→JPG, compress, resize px/%/KB, crop+rotate, remove metadata, watermark text/logo, favicon pack, image→SVG); worker pool; SVG rasterised on main thread (`workers/prepare.ts`); registry `load` runs in the worker (`workers/proxy.ts`) so codecs bundle once; first-load JS 124 KB.
+- Tests: 28 vitest pass. e2e `tests/e2e/images.spec.ts`: converters to jpg/webp/avif/ico/pdf, heic→jpg and broken-file error pass on desktop; the rest were blocked by a test-helper bug (fixed, not re-run yet).
+- Vectorize uses `imagetracerjs` (Unlicense), NOT potrace: `esm-potrace-wasm` is GPL-2.0-only → incompatible with AGPL-3.0 and with a future commercial licence.
+
 ## Next step (exact)
-- Phase 1: add `@jsquash/*` adapters + image tools to the registry; one Playwright smoke test per tool with ≤50 KB fixtures.
+1. Fix TIFF decode: `photo.tiff` (LZW) fails with "corrupted" in the worker (`adapters/image/decode.ts` `viaTiff`, utif2). Check the worker error message first.
+2. Re-run `npx playwright test tests/e2e/images.spec.ts` (desktop, then mobile incl. the 20-image throttled batch); fix failures.
+3. Full test run, update FORMATS.md, merge `phase-1-images` → main, push, check CI + Pages.

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { onDestroy, untrack } from 'svelte';
 	import { t } from '../i18n';
-	import type { Lang, Options, Tool } from '../registry/types';
+	import { formatList } from '../registry/tools';
+	import type { FileData, Lang, OptionSpec, Options, Tool } from '../registry/types';
 	import { ConvertError } from '../registry/types';
+	import { prepare } from '../workers/prepare';
 	import { acceptOf, createRunner, validate } from '../workers/runner.svelte';
 	import DropZone from './DropZone.svelte';
 	import ResultList, { type Item } from './ResultList.svelte';
@@ -18,12 +20,13 @@
 	let options = $state<Options>(
 		untrack(() => Object.fromEntries((tool.options ?? []).map((o) => [o.id, o.default])))
 	);
+	let missing = $state<string | null>(null);
 
 	const pending = $derived(items.some((i) => i.status === 'waiting'));
 	const finished = $derived(items.length > 0 && items.every((i) => i.status === 'done' || i.status === 'error'));
-	const formats = $derived(
-		tool.from.filter((f) => !f.includes('/')).map((f) => f.toUpperCase()).join('، ')
-	);
+	const formats = $derived(formatList(tool.from).join(lang === 'ar' ? '، ' : ', '));
+	const shown = (o: OptionSpec) => !o.when || o.when.in.includes(options[o.when.id] as string);
+	const visible = $derived((tool.options ?? []).filter(shown));
 
 	function add(files: File[]) {
 		if (!tool.batch) items = [];
@@ -40,19 +43,34 @@
 		}
 	}
 
-	async function convert() {
-		busy = true;
-		for (const item of items) {
-			if (item.status !== 'waiting') continue;
-			item.status = 'working';
-			try {
-				item.outputs = await runner.run(tool, item.file, options, (r) => (item.progress = r));
-				item.status = 'done';
-			} catch (e) {
-				item.status = 'error';
-				item.error = e instanceof ConvertError ? e.code : 'unknown';
-			}
+	async function pickImage(id: string, e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		options[id] = file ? ((await prepare(file)) as FileData) : null;
+	}
+
+	async function runOne(item: Item) {
+		item.status = 'working';
+		try {
+			item.outputs = await runner.run(tool, item.file, options, (r) => (item.progress = r));
+			item.status = 'done';
+		} catch (e) {
+			item.status = 'error';
+			item.error = e instanceof ConvertError ? e.code : 'unknown';
 		}
+	}
+
+	async function convert() {
+		const need = visible.find((o) => o.type === 'image' && !options[o.id]);
+		if (need) {
+			missing = need.id;
+			document.getElementById(`opt-${need.id}`)?.focus();
+			return;
+		}
+		missing = null;
+		busy = true;
+		// The runner queues these and runs as many at once as it has workers.
+		await Promise.all(items.filter((i) => i.status === 'waiting').map(runOne));
 		busy = false;
 	}
 
@@ -72,32 +90,70 @@
 			onfiles={add}
 		/>
 	{:else}
-		{#if tool.options?.length && !finished}
+		{#if visible.length && !finished}
 			<fieldset class="options" disabled={busy}>
 				<legend>{t(lang, 'tool.options')}</legend>
-				{#each tool.options as opt (opt.id)}
-					<label class="field">
-						<span>{opt.label[lang]}</span>
-						{#if opt.type === 'select'}
-							<select bind:value={options[opt.id]}>
-								{#each opt.choices as c (c.value)}
-									<option value={c.value}>{c.label[lang]}</option>
-								{/each}
-							</select>
-						{:else if opt.type === 'checkbox'}
-							<input type="checkbox" bind:checked={options[opt.id] as boolean} />
-						{:else if opt.type === 'text'}
-							<input type="text" bind:value={options[opt.id]} />
+				{#each visible as opt (opt.id)}
+					<div class="field" class:wide={opt.type === 'range' || opt.type === 'text'}>
+						{#if opt.type === 'checkbox'}
+							<label class="check">
+								<input id="opt-{opt.id}" type="checkbox" bind:checked={options[opt.id] as boolean} />
+								<span>{opt.label[lang]}</span>
+							</label>
 						{:else}
-							<input
-								type={opt.type}
-								min={opt.min}
-								max={opt.max}
-								step={opt.step ?? 1}
-								bind:value={options[opt.id]}
-							/>
+							<label for="opt-{opt.id}">
+								{opt.label[lang]}
+								{#if opt.type === 'range'}
+									<output for="opt-{opt.id}" dir="ltr">{options[opt.id]}{opt.unit ?? ''}</output>
+								{/if}
+							</label>
+							{#if opt.type === 'select'}
+								<select id="opt-{opt.id}" bind:value={options[opt.id]}>
+									{#each opt.choices as c (c.value)}
+										<option value={c.value}>{c.label[lang]}</option>
+									{/each}
+								</select>
+							{:else if opt.type === 'text'}
+								<input id="opt-{opt.id}" type="text" dir="auto" bind:value={options[opt.id]} />
+							{:else if opt.type === 'color'}
+								<input id="opt-{opt.id}" type="color" bind:value={options[opt.id]} />
+							{:else if opt.type === 'image'}
+								<input
+									id="opt-{opt.id}"
+									type="file"
+									accept="image/*"
+									aria-invalid={missing === opt.id}
+									aria-describedby={missing === opt.id ? `err-${opt.id}` : undefined}
+									onchange={(e) => pickImage(opt.id, e)}
+								/>
+								{#if missing === opt.id}
+									<span id="err-{opt.id}" class="err" role="alert">{t(lang, 'tool.needImage')}</span>
+								{/if}
+							{:else if opt.type === 'range'}
+								<input
+									id="opt-{opt.id}"
+									type="range"
+									min={opt.min}
+									max={opt.max}
+									step={opt.step ?? 1}
+									bind:value={options[opt.id]}
+								/>
+							{:else}
+								<span class="with-unit">
+									<input
+										id="opt-{opt.id}"
+										type="number"
+										inputmode="numeric"
+										min={opt.min}
+										max={opt.max}
+										step={opt.step ?? 1}
+										bind:value={options[opt.id]}
+									/>
+									{#if opt.unit}<span class="unit" dir="ltr">{opt.unit}</span>{/if}
+								</span>
+							{/if}
 						{/if}
-					</label>
+					</div>
 				{/each}
 			</fieldset>
 		{/if}
@@ -123,8 +179,8 @@
 		gap: var(--space-6);
 	}
 	.options {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
 		gap: var(--space-4);
 		margin: 0;
 		padding: var(--space-4);
@@ -139,21 +195,81 @@
 	.field {
 		display: grid;
 		gap: var(--space-1);
-		min-width: 12rem;
+		align-content: start;
 		font-size: 0.95rem;
 	}
+	.field.wide {
+		grid-column: span 2;
+	}
+	@media (max-width: 480px) {
+		.field.wide {
+			grid-column: auto;
+		}
+	}
+	.field > label {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-2);
+	}
+	output {
+		font-weight: 700;
+		color: var(--accent-strong);
+	}
 	.field select,
-	.field input:not([type='checkbox']) {
+	.field input[type='text'],
+	.field input[type='number'],
+	.field input[type='file'] {
+		width: 100%;
 		min-height: var(--tap);
 		padding: 0 var(--space-3);
 		border: 1px solid var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--bg);
 	}
-	.field input[type='checkbox'] {
+	.field input[type='file'] {
+		padding: var(--space-2);
+	}
+	.field input[type='range'] {
+		width: 100%;
+		min-height: var(--tap);
+		accent-color: var(--accent);
+	}
+	.field input[type='color'] {
+		width: 100%;
+		height: var(--tap);
+		padding: 2px;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		background: var(--bg);
+	}
+	.check {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-height: var(--tap);
+		cursor: pointer;
+	}
+	.check input {
 		width: 22px;
 		height: 22px;
 		accent-color: var(--accent);
+	}
+	.with-unit {
+		position: relative;
+		display: block;
+	}
+	.unit {
+		position: absolute;
+		inset-inline-end: var(--space-3);
+		top: 50%;
+		transform: translateY(-50%);
+		color: var(--muted);
+		font-size: 0.85rem;
+		pointer-events: none;
+	}
+	.err {
+		color: var(--danger);
+		font-size: 0.875rem;
 	}
 	.bar {
 		display: flex;
