@@ -1,0 +1,33 @@
+name: Server tools
+
+# Builds the API image and runs every tool against real fixtures next to Gotenberg.
+# Heavy (calibre, LibreOffice), so only when the server or the deploy files change.
+on:
+  push:
+    branches: [main]
+    paths: [server/**, deploy/**, .github/workflows/server.yml]
+  pull_request:
+    paths: [server/**, deploy/**, .github/workflows/server.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: server-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tools:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Start Gotenberg and the API
+        run: docker compose -f deploy/docker-compose.yml up -d --build --wait gotenberg api
+      - name: Build the test image
+        run: docker build --target test -t office-lab-api:test server
+      - name: Tool tests
+        run: docker run --rm --network office-lab_internal office-lab-api:test
+      - if: failure()
+        run: docker compose -f deploy/docker-compose.yml logs --tail 200

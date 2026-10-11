@@ -1,0 +1,108 @@
+# تشغيل «المعمل» (نسخة الخادم) على VPS من Hostinger
+
+نسخة الخادم = الموقع + أدوات الخادم (Word/Excel/PowerPoint إلى PDF، ضغط PDF قوي، PDF إلى Word، OCR للملفات الكبيرة، الكتب الإلكترونية، pandoc، رابط إلى PDF).
+كل شيء يعمل داخل Docker: ثلاث حاويات (Caddy للموقع وHTTPS، وFastAPI للتحويل، وGotenberg فيه LibreOffice وChromium).
+
+> **الاستضافة المشتركة (Web/Business Hosting) لا تكفي لنسخة الخادم**، لأنها تمنع تشغيل البرامج وDocker.
+> تقدر تستخدمها للنسخة الخفيفة فقط (أدوات المتصفح): ابنِ الموقع بـ`npm run build` وارفع محتويات `web/build` إلى `public_html`.
+
+## 1) الخطة المناسبة
+
+- **KVM 2** أو أعلى: 2 معالج، 8 جيجا رام، 100 جيجا NVMe — تكفي للبداية بارتياح. (KVM 1 بـ4 جيجا رام تعمل لكن LibreOffice وcalibre يحتاجان ذاكرة، فتحويلان كبيران معًا قد يبطئان.)
+- نظام التشغيل: **Ubuntu 24.04** (بدون لوحة تحكم). قالب "Docker" من Hostinger يصلح أيضًا.
+- المعالج لازم يكون x86-64 (كل خطط KVM من Hostinger كذلك).
+
+## 2) الدومين (DNS)
+
+في لوحة الدومين أضف سجل **A**:
+
+| النوع | الاسم | القيمة |
+|---|---|---|
+| A | `lab` (أو `@` للدومين الرئيسي) | عنوان IP الخاص بالـVPS |
+
+انتظر دقائق حتى ينتشر السجل. تأكد بالأمر: `ping lab.example.com` لازم يرد بعنوان الـVPS.
+
+## 3) التثبيت (مرة واحدة)
+
+ادخل على الخادم من الطرفية (Terminal) أو من «Browser terminal» في لوحة Hostinger:
+
+```bash
+ssh root@IP_الخادم
+curl -fsSL https://raw.githubusercontent.com/micro4tricks-ai/office-lab/main/deploy/install-vps.sh | bash
+```
+
+السكربت:
+1. يثبت Docker من المستودع الرسمي.
+2. يفتح في الجدار الناري المنافذ 22 و80 و443 فقط (ufw).
+3. ينزل الكود في `/opt/office-lab`.
+4. ينسخ `deploy/.env.example` إلى `deploy/.env` ويسألك عن **الدومين**.
+5. يبني الحاويات ويشغلها. أول مرة تأخذ **10–20 دقيقة** (calibre وLibreOffice كبيران).
+
+بعدها افتح `https://الدومين/` — شهادة HTTPS تصدر تلقائيًا من Let's Encrypt عند أول زيارة وتتجدد وحدها.
+
+> لو تركت الدومين فارغًا، يعمل الموقع على `http://IP_الخادم/` بدون HTTPS (للتجربة فقط).
+
+## 4) التشغيل والإيقاف
+
+كل الأوامر من داخل `/opt/office-lab/deploy`:
+
+```bash
+cd /opt/office-lab/deploy
+docker compose up -d --build     # تشغيل (أو إعادة بناء بعد تعديل)
+docker compose ps                # الحالة: لازم الثلاثة running و api healthy
+docker compose down              # إيقاف
+```
+
+## 5) التحديث
+
+```bash
+cd /opt/office-lab && git pull && cd deploy && docker compose up -d --build && docker image prune -f
+```
+
+أو شغّل سكربت التثبيت مرة ثانية — يحدّث الكود ويعيد التشغيل ولا يلمس ملف `.env`.
+
+## 6) النسخ الاحتياطي والمراقبة
+
+- **لا توجد بيانات لنسخها**: الخادم لا يحتفظ بالملفات (كل ملف يُحذف بعد تحويله، وأي بقايا تُحذف بعد 60 دقيقة). احتفظ فقط بنسخة من `deploy/.env`.
+- **مراقبة اختيارية** (Uptime Kuma):
+  ```bash
+  docker compose --profile monitoring up -d
+  ```
+  ثم من جهازك: `ssh -L 3001:127.0.0.1:3001 root@IP_الخادم` وافتح `http://localhost:3001` وأضف مراقبة HTTP على `https://الدومين/api/health`.
+
+## 7) الإعدادات (`deploy/.env`)
+
+| المتغير | الافتراضي | المعنى |
+|---|---|---|
+| `DOMAIN` | `:80` | الدومين (يفعّل HTTPS). `:80` = HTTP على أي عنوان |
+| `MAX_MB` | `100` | أكبر حجم ملف بالميجابايت |
+| `BODY_MAX` | `130MB` | حد Caddy للطلب (أكبر قليلًا من `MAX_MB`) |
+| `RETENTION_MIN` | `60` | بعد كم دقيقة تُحذف أي ملفات متبقية |
+| `RATE_LIMIT` | `30/minute` | عدد الطلبات لكل عنوان IP |
+| `CONCURRENCY` | عدد الأنوية | عدد التحويلات في نفس الوقت |
+| `CORS_ORIGINS` | فارغ | مواقع أخرى مسموح لها تستخدم الـAPI (مثل نسخة GitHub Pages) |
+
+بعد أي تعديل: `docker compose up -d`.
+
+**ربط نسخة GitHub Pages بهذا الخادم (اختياري):** ضع `CORS_ORIGINS=https://micro4tricks-ai.github.io` هنا، وفي GitHub أضف متغير المستودع `PUBLIC_API_URL=https://الدومين` (Settings → Secrets and variables → Actions → Variables)، ثم أعد النشر.
+
+## 8) حل المشاكل
+
+| المشكلة | الحل |
+|---|---|
+| الموقع لا يفتح | `docker compose ps` ثم `docker compose logs caddy --tail 50` |
+| HTTPS لا يعمل | تأكد أن سجل A يشير للخادم وأن المنفذين 80 و443 مفتوحان: `ufw status` |
+| أداة خادم تعطي خطأ | `docker compose logs api --tail 100` و`docker compose logs gotenberg --tail 100` (السجلات لا تحتوي أسماء الملفات أو محتواها) |
+| «الخادم مشغول» | زد `CONCURRENCY` (إن كان الرام يسمح) أو ارفع الخطة |
+| امتلأ القرص | `docker system prune -af` (يحذف الصور القديمة؛ التشغيل التالي يعيد بناءها) و`df -h` للتأكد |
+| الرام ممتلئ | `free -h` — LibreOffice وcalibre يستهلكان الكثير؛ قلل `CONCURRENCY` |
+
+## الأمان (ما تم عمله)
+
+- الـAPI وGotenberg على شبكة داخلية لا تصل إليها من الإنترنت؛ Caddy فقط هو المفتوح.
+- Gotenberg يرفض أي رابط أو ملف يحاول الوصول لعناوين داخلية (حماية SSRF)، والـAPI يرفض الروابط الداخلية قبله.
+- pandoc يعمل بـ`--sandbox` (المستند لا يستطيع قراءة ملفات الخادم)، وكل برنامج يعمل بمهلة زمنية ويُقتل إن تجاوزها.
+- الحاوية تعمل بمستخدم عادي (ليس root) ونظام ملفات للقراءة فقط، وكل تحويل في مجلد مؤقت يُحذف فورًا.
+- حماية من الملفات المضغوطة الخادعة (zip bomb)، وحد للحجم ولعدد الطلبات.
+
+**ملاحظة:** Docker يفتح المنافذ المنشورة (80 و443) بنفسه حتى لو أغلقها ufw — وهذا مقصود هنا. لا تضف منافذ أخرى في `docker-compose.yml`.

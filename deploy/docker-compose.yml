@@ -64,6 +64,18 @@ services:
     networks: [internal, egress]
     restart: unless-stopped
 
+  # Optional uptime monitor: docker compose --profile monitoring up -d
+  # Open it through an SSH tunnel: ssh -L 3001:127.0.0.1:3001 root@SERVER → http://localhost:3001
+  uptime-kuma:
+    image: louislam/uptime-kuma:2@sha256:9912da7d7d9b6ddc0c2d904beb84d24689c1ed9c33b81419eb9008663a92a329
+    profiles: [monitoring]
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - kuma:/app/data
+    networks: [edge, internal]
+    restart: unless-stopped
+
 networks:
   internal:
     internal: true
@@ -74,3 +86,4 @@ volumes:
   caddy_data: {}
   caddy_config: {}
   jobs: {}
+  kuma: {}
