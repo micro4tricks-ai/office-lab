@@ -5,12 +5,14 @@ import { docTools } from './doc-tools';
 import { ocrTools } from './ocr-tools';
 import { filesTools } from './files-tools';
 import { officeTools } from './office-tools';
+import { pdfExtraTools } from './pdf-extra-tools';
 import { pdfTools } from './pdf-tools';
 import type { Tool } from './types';
 
 /** Single source of truth: UI, routes, SEO pages and capability checks come from here. */
 export const tools: Tool[] = [
 	...pdfTools,
+	...pdfExtraTools,
 	...imageTools,
 	...dataTools,
 	...docTools,
