@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { t } from '../i18n';
 	import type { Lang } from '../registry/types';
 	import Icon from './Icon.svelte';
@@ -30,6 +31,11 @@
 		const files = [...(e.dataTransfer?.files ?? [])];
 		if (files.length) onfiles(multiple ? files : files.slice(0, 1));
 	}
+
+	// Files chosen before hydration finished would otherwise be ignored.
+	onMount(() => {
+		if (input.files?.length) picked();
+	});
 
 	function picked() {
 		const files = [...(input.files ?? [])];

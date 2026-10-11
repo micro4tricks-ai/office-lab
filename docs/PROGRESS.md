@@ -9,7 +9,7 @@ Current phase: 1 — Images
 - [x] SvelteKit static, ar/en switch (dir flips), dark/light, responsive 360px → desktop
 - [x] home: search + category grid from the registry (1 dummy tool: `txt-to-html`)
 - [x] drop zone / file picker, progress bar, result list, download one / all as ZIP
-- [x] ci.yml + pages.yml (actions pinned by SHA)
+- [x] ci.yml + pages.yml (actions pinned by SHA) — both green on GitHub; live site smoke-tested (convert + download)
 - [x] tests: 6 vitest, 18 playwright (desktop + mobile, incl. axe a11y); Lighthouse a11y 100 on ar/, en/, tool page
 
 ## Phase 1 checklist
