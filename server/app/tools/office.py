@@ -1,7 +1,10 @@
 """Office documents, HTML and web pages → PDF/image, through Gotenberg (LibreOffice + Chromium)."""
 
+import ipaddress
 import re
+import socket
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from .. import gotenberg
 from ..errors import ToolError
@@ -51,10 +54,31 @@ URL_RE = re.compile(r"^https?://[^\s/?#@]+(?:[/?#][^\s]*)?$", re.I)
 
 
 def check_url(url: str | None) -> str:
-    """Public http(s) pages only. Gotenberg also refuses hosts that resolve to private IPs."""
+    """Public http(s) pages only.
+
+    First line of defence against SSRF: no private IP literals, no single-label or internal names
+    (our containers are `api`, `gotenberg`, `caddy`). Gotenberg runs with --chromium-deny-private-ips,
+    which checks what every request (redirects and sub-resources too) resolves to.
+    """
     url = (url or "").strip()
     if len(url) > 2000 or not URL_RE.match(url):
         raise ToolError("bad-options", "bad url")
+    host = (urlsplit(url).hostname or "").rstrip(".").lower()
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        ip = None
+    if ip is None and re.fullmatch(r"[0-9a-fx.]+", host):
+        # Browsers also read odd IPv4 forms: 0x7f.1, 017700000001, 2130706433 all mean 127.0.0.1.
+        try:
+            ip = ipaddress.IPv4Address(socket.inet_aton(host))
+        except OSError:
+            pass
+    if ip is not None:
+        if not ip.is_global:
+            raise ToolError("bad-options", "private address")
+    elif "." not in host or host == "localhost" or host.endswith((".localhost", ".local", ".internal", ".lan", ".home.arpa")):
+        raise ToolError("bad-options", "private address")
     return url
 
 

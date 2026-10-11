@@ -39,8 +39,9 @@ async def convert(
             async with c.stream(
                 "POST",
                 f"{settings.gotenberg_url}{route}",
-                files=[("files", (name, fh)) for name, fh in handles],
-                data=data or {},
+                # Always multipart (Gotenberg refuses url-encoded forms), fields as (None, value).
+                files=[("files", (name, fh)) for name, fh in handles]
+                + [(k, (None, v)) for k, v in (data or {}).items()],
             ) as r:
                 if r.status_code != 200:
                     raise _error(r.status_code, (await r.aread()).decode("utf-8", "replace"))

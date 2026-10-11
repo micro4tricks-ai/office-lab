@@ -156,13 +156,18 @@ def test_sweeper_removes_only_old_jobs(tmp_path, monkeypatch):
     assert [p.name for p in tmp_path.iterdir()] == ["new"]
 
 
-@pytest.mark.parametrize("url", ["https://example.com", "http://example.com/a?b=c#d", "https://ar.wikipedia.org/wiki/مصر"])
+@pytest.mark.parametrize("url", ["https://example.com", "http://example.com/a?b=c#d", "https://ar.wikipedia.org/wiki/مصر",
+                                 "https://cafe.de/", "http://8.8.8.8/"])
 def test_good_urls(url):
     assert check_url(f"  {url} ") == url
 
 
 @pytest.mark.parametrize("url", ["file:///etc/passwd", "ftp://x.com", "javascript:alert(1)", "https://user@host.com",
-                                 "http://", "https://a.com/" + "x" * 2000, "", None])
+                                 "http://", "https://a.com/" + "x" * 2000, "", None, "http://localhost:3000/health",
+                                 "http://gotenberg:3000/", "http://api:8000/api/health", "http://127.0.0.1/", "http://10.0.0.5/",
+                                 "http://169.254.169.254/latest/meta-data/", "http://[::1]/", "http://0.0.0.0/",
+                                 "http://172.18.0.2/", "http://printer.local/", "http://2130706433/", "http://0x7f.1/", "http://017700000001/",
+                                 "http://127.1/"])
 def test_bad_urls(url):
     with pytest.raises(ToolError):
         check_url(url)

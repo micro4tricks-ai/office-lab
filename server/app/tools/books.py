@@ -21,6 +21,9 @@ async def ebook(job: Job) -> Path:
     args = ["ebook-convert", str(job.src), str(out)]
     if to == "pdf":
         args += ["--paper-size", "a4", "--pdf-page-numbers"]
+    if job.ext == "pdf":
+        # calibre's header/footer guessing crashes on short PDFs (IndexError in reflow.py).
+        args += ["--pdf-header-skip", "0", "--pdf-footer-skip", "0"]
     code, err = await run(args, job.dir, job.timeout)
     if "drm" in err.lower():
         raise ToolError("password", "DRM")

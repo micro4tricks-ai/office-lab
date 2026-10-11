@@ -2,3 +2,4 @@
 *.png binary
 *.wasm binary
 web/tests/fixtures/** -text
+server/tests/fixtures/** -text

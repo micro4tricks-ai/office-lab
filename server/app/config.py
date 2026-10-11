@@ -7,7 +7,8 @@ from pathlib import Path
 
 
 def _int(name: str, default: int) -> int:
-    return int(os.environ.get(name, default))
+    value = os.environ.get(name, "").strip()  # empty (compose passes "") = default
+    return int(value) if value else default
 
 
 @dataclass
