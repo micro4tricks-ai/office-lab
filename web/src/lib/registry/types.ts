@@ -8,9 +8,15 @@ export const CATEGORIES: Category[] = ['image', 'pdf', 'document', 'data', 'eboo
 export type FileData = { name: string; type: string; bytes: Uint8Array; note?: NoteKey };
 
 /** Short remarks an adapter can attach to an output (keys in i18n `note.*`). */
-export type NoteKey = 'kept-original' | 'metadata-removed' | 'no-metadata' | 'orientation-applied' | 'target-missed';
+export type NoteKey =
+	| 'kept-original'
+	| 'metadata-removed'
+	| 'no-metadata'
+	| 'orientation-applied'
+	| 'target-missed'
+	| 'identical';
 
-export type ErrorCode = 'wrong-type' | 'too-big' | 'password' | 'corrupted' | 'unknown';
+export type ErrorCode = 'wrong-type' | 'too-big' | 'password' | 'corrupted' | 'pages' | 'nothing' | 'unknown';
 
 export class ConvertError extends Error {
 	constructor(
@@ -21,12 +27,23 @@ export class ConvertError extends Error {
 	}
 }
 
-export type OptionValue = string | number | boolean | FileData | null;
+/** One page in an organized PDF: which source page, and extra rotation. */
+export type PagePlan = { src: number; rotate: number };
+/**
+ * Something drawn on a page (signature, text, image), already as PNG. Position and size are
+ * fractions of the page as the reader sees it; (x, y) is the top-left corner.
+ */
+export type Placement = { page: number; x: number; y: number; w: number; h: number; png: FileData };
+export type FormValues = Record<string, string | boolean>;
+
+export type OptionValue = string | number | boolean | FileData | null | PagePlan[] | Placement[] | FormValues;
 export type Options = Record<string, OptionValue>;
 
 /** Every engine sits behind this, so any library can be swapped later. */
 export type Adapter = {
 	convert(input: FileData, options: Options, onProgress?: (ratio: number) => void): Promise<FileData[]>;
+	/** For tools with `combine`: all files in one job (merge, images → PDF, compare). */
+	combine?(inputs: FileData[], options: Options, onProgress?: (ratio: number) => void): Promise<FileData[]>;
 };
 
 type Text = { ar: string; en: string };
@@ -39,7 +56,7 @@ export type OptionSpec = When &
 		| { id: string; type: 'select'; label: Text; default: string; choices: { value: string; label: Text }[] }
 		| { id: string; type: 'range' | 'number'; label: Text; default: number; min: number; max: number; step?: number; unit?: string }
 		| { id: string; type: 'checkbox'; label: Text; default: boolean }
-		| { id: string; type: 'text'; label: Text; default: string }
+		| { id: string; type: 'text'; label: Text; default: string; secret?: boolean; required?: boolean; placeholder?: Text }
 		| { id: string; type: 'color'; label: Text; default: string }
 		/** A second file the tool needs (e.g. a logo); not a batch input. */
 		| { id: string; type: 'image'; label: Text; default: null }
@@ -63,5 +80,9 @@ export type Tool = {
 	options?: OptionSpec[];
 	maxMB: number;
 	batch: boolean;
+	/** All files become ONE job (order matters, user can reorder). */
+	combine?: { min: number; max?: number };
+	/** An interactive step before converting; it writes options.plan / .items / .fields. */
+	editor?: 'organize' | 'place' | 'form';
 	i18n: Record<Lang, ToolText>;
 };

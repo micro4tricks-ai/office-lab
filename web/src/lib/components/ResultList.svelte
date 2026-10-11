@@ -8,6 +8,10 @@
 		progress: number;
 		error?: ErrorCode;
 		outputs: FileData[];
+		/** Shown instead of the file name (e.g. "3 files" for a combined job). */
+		label?: string;
+		/** "Before" size when it is not the file's own (combined jobs). */
+		inputSize?: number;
 	};
 </script>
 
@@ -23,16 +27,25 @@
 		lang,
 		items,
 		maxMB,
-		onremove
-	}: { lang: Lang; items: Item[]; maxMB: number; onremove?: (id: number) => void } = $props();
+		onremove,
+		onmove
+	}: {
+		lang: Lang;
+		items: Item[];
+		maxMB: number;
+		onremove?: (id: number) => void;
+		/** Reorder (combine tools): -1 up, +1 down. */
+		onmove?: (id: number, by: -1 | 1) => void;
+	} = $props();
 
 	const outputs = $derived(items.flatMap((i) => i.outputs));
 	const total = (i: Item) => i.outputs.reduce((s, o) => s + o.bytes.byteLength, 0);
+	const before = (i: Item) => i.inputSize ?? i.file.size;
 	const preview = (i: Item) => i.outputs.find((o) => o.type.startsWith('image/'));
 	/** −42% / +8%, only when one file came out of one file. */
 	function change(i: Item) {
-		if (i.outputs.length !== 1 || !i.file.size) return null;
-		const pct = Math.round(((total(i) - i.file.size) / i.file.size) * 100);
+		if (i.outputs.length !== 1 || !before(i)) return null;
+		const pct = Math.round(((total(i) - before(i)) / before(i)) * 100);
 		return pct === 0 ? null : pct;
 	}
 	const pctText = (lang: Lang, n: number) =>
@@ -58,10 +71,10 @@
 					<span class="ficon"><Icon name="file" /></span>
 				{/if}
 				<div class="info">
-					<p class="name" dir="auto">{item.file.name}</p>
+					<p class="name" dir="auto">{item.label ?? item.file.name}</p>
 					<p class="meta">
 						{#if item.status === 'done'}
-							{t(lang, 'result.before')}: {formatSize(lang, item.file.size)}
+							{t(lang, 'result.before')}: {formatSize(lang, before(item))}
 							· {t(lang, 'result.after')}:
 							{formatSize(lang, total(item))}
 							{#if change(item) !== null}
@@ -92,6 +105,15 @@
 						>
 							<Icon name="download" />
 							{t(lang, 'result.download')}
+						</button>
+					{/if}
+					{#if onmove && item.status === 'waiting'}
+						{@const i = items.indexOf(item)}
+						<button class="remove" type="button" disabled={i === 0} onclick={() => onmove(item.id, -1)} aria-label={t(lang, 'drop.up', { name: item.file.name })}>
+							<Icon name="up" />
+						</button>
+						<button class="remove" type="button" disabled={i === items.length - 1} onclick={() => onmove(item.id, 1)} aria-label={t(lang, 'drop.down', { name: item.file.name })}>
+							<Icon name="down" />
 						</button>
 					{/if}
 					{#if onremove && item.status !== 'working'}
@@ -233,7 +255,11 @@
 		color: var(--muted);
 		cursor: pointer;
 	}
-	.remove:hover {
+	.remove:disabled {
+		opacity: 0.35;
+		cursor: default;
+	}
+	.remove:hover:not(:disabled) {
 		background: var(--surface-2);
 		color: var(--text);
 	}

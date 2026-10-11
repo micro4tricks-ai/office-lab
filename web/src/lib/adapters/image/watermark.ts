@@ -1,33 +1,10 @@
-import arabicFont from '@fontsource-variable/cairo/files/cairo-arabic-wght-normal.woff2?url';
-import latinFont from '@fontsource-variable/cairo/files/cairo-latin-wght-normal.woff2?url';
 import { ConvertError, type Adapter, type FileData } from '../../registry/types';
 import { decodeImage } from './decode';
 import { encodeImage } from './encode';
 import { sameFormat } from './formats';
 import { output } from './output';
 import { resize, toCanvas } from './pixels';
-
-const FAMILY = 'Office Lab Watermark';
-let fonts: Promise<void> | null = null;
-
-/** Cairo (self-hosted) so Arabic watermarks are shaped properly inside the worker. */
-function loadFonts() {
-	fonts ??= (async () => {
-		const set = (self as unknown as { fonts: FontFaceSet }).fonts;
-		const faces = [
-			new FontFace(FAMILY, `url(${arabicFont})`, {
-				weight: '200 1000',
-				unicodeRange: 'U+0600-06FF,U+0750-077F,U+0870-08FF,U+200C-200E,U+FB50-FDFF,U+FE70-FEFC'
-			}),
-			new FontFace(FAMILY, `url(${latinFont})`, {
-				weight: '200 1000',
-				unicodeRange: 'U+0000-00FF,U+0131,U+0152-0153,U+2000-206F,U+20AC,U+2122'
-			})
-		];
-		for (const f of faces) set.add(await f.load());
-	})();
-	return fonts;
-}
+import { FAMILY, isArabic, loadFonts } from '../text-image';
 
 const POS: Record<string, [number, number]> = {
 	tl: [0, 0], tc: [0.5, 0], tr: [1, 0],
@@ -66,7 +43,7 @@ const adapter: Adapter = {
 			c.font = `700 ${px}px "${FAMILY}"`;
 			c.textAlign = 'center';
 			c.textBaseline = 'middle';
-			c.direction = /[؀-ۿ]/.test(text) ? 'rtl' : 'ltr';
+			c.direction = isArabic(text) ? 'rtl' : 'ltr';
 			[mw, mh] = [c.measureText(text).width, px * 1.2];
 			c.fillStyle = String(options.color || '#ffffff');
 			c.strokeStyle = 'rgba(0,0,0,0.35)';

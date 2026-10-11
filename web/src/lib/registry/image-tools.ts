@@ -81,22 +81,6 @@ export const imageTools: Tool[] = [
 		}
 	},
 	{
-		id: 'image-to-pdf',
-		category: 'pdf',
-		from: IMAGE_INPUTS,
-		to: ['pdf'],
-		runtime: 'browser',
-		engine: 'image-convert',
-		load: inWorker('image-convert'),
-		params: { format: 'pdf', quality: 90 },
-		maxMB: 50,
-		batch: true,
-		i18n: {
-			ar: { title: 'تحويل صورة إلى PDF', desc: 'كل صورة تصبح ملف PDF بصفحة بمقاسها الأصلي.', keywords: ['jpg to pdf', 'صورة pdf', 'png to pdf'] },
-			en: { title: 'Image to PDF', desc: 'Each image becomes a PDF with one page at its own size.', keywords: ['jpg to pdf', 'png to pdf', 'image to pdf'] }
-		}
-	},
-	{
 		id: 'compress-image',
 		category: 'image',
 		from: IMAGE_INPUTS,

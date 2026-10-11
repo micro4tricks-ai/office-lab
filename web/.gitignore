@@ -25,3 +25,6 @@ vite.config.ts.timestamp-*
 # Tests
 /test-results
 /playwright-report
+
+# Copied by scripts/copy-assets.mjs
+/static/pdfjs
