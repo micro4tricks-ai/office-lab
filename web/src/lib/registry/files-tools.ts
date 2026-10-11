@@ -23,6 +23,10 @@ export const filesTools: Tool[] = [
 			en: { title: 'Read a QR code from an image', desc: 'Upload a photo or screenshot with a QR code and get what it says.', keywords: ['qr reader', 'scan qr', 'decode qr'] }
 		}
 	},
+	widgetTool('password-generator', 'password', 'files', {
+		ar: { title: 'مولّد كلمات المرور', desc: 'أنشئ كلمات مرور قوية وعشوائية على جهازك، بدون حروف متشابهة، مع مؤشر القوة.', keywords: ['كلمة مرور', 'باسورد', 'password generator', 'كلمة سر'] },
+		en: { title: 'Password generator', desc: 'Make strong random passwords on your device, without look-alike characters, with a strength meter.', keywords: ['password generator', 'strong password', 'random password'] }
+	}),
 	widgetTool('barcode', 'barcode', 'office', {
 		ar: { title: 'صانع الباركود', desc: 'باركود EAN13 للمنتجات أو CODE128 وغيرها، جاهز للطباعة على الملصقات.', keywords: ['باركود', 'barcode', 'ean13', 'code128'] },
 		en: { title: 'Barcode maker', desc: 'EAN13 for products, CODE128 and more — ready for label printing.', keywords: ['barcode', 'ean13', 'code128', 'upc'] }

@@ -2,6 +2,36 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 test.describe('office widgets', () => {
+	test('invoice: totals, VAT, amount in words and the preview', async ({ page }) => {
+		await page.goto('ar/invoice-maker/');
+		await page.getByTestId('inv-seller').fill('شركة النور');
+		await page.getByTestId('inv-buyer').fill('العميل <b>X</b>');
+		await page.getByTestId('inv-desc').fill('صيانة وحدات التكييف');
+		await page.getByTestId('inv-qty').fill('2');
+		await page.getByTestId('inv-price').fill('500');
+		await expect(page.getByTestId('inv-total')).toContainText('EGP');
+		await expect(page.getByTestId('inv-total')).toContainText('١٬١٤٠٫٠٠');
+		const doc = page.frameLocator('[data-testid="inv-preview"]');
+		await expect(doc.locator('h1')).toHaveText('فاتورة ضريبية');
+		await expect(doc.locator('.words')).toContainText('فقط ألف ومائة وأربعون جنيهًا مصريًا لا غير');
+		await expect(doc.locator('.party')).toContainText('العميل <b>X</b>'); // typed text shown as text
+		await expect(doc.locator('.grand')).toContainText('1,140.00 EGP');
+	});
+
+	test('password generator: length, count, all character groups', async ({ page }) => {
+		await page.goto('en/password-generator/');
+		const items = page.getByTestId('passwords').locator('code');
+		await expect(items).toHaveCount(1);
+		const pw = await items.first().textContent();
+		expect(pw).toHaveLength(16);
+		expect(pw).toMatch(/[a-z]/);
+		expect(pw).toMatch(/[A-Z]/);
+		expect(pw).toMatch(/[2-9]/);
+		expect(pw).not.toMatch(/[01lIO]/);
+		await page.getByLabel('How many').fill('5');
+		await expect(items).toHaveCount(5);
+	});
+
 	test('tafqeet writes the amount in Arabic and English', async ({ page }) => {
 		await page.goto('ar/tafqeet/');
 		await expect(page.getByTestId('taf-ar')).toHaveText('فقط ألف وخمسمائة جنيه مصري وخمسون قرشًا لا غير');

@@ -27,7 +27,7 @@
 	<meta name="keywords" content={text.keywords.join(', ')} />
 </svelte:head>
 
-<div class="container page" class:wide={tool.widget === 'markdown'}>
+<div class="container page" class:wide={tool.widget === 'markdown' || tool.widget === 'invoice'}>
 	<nav class="crumbs" aria-label={t(lang, 'nav.home')}>
 		<a href={resolve('/[lang]', { lang }) + '/'}>{t(lang, 'nav.home')}</a>
 		<span aria-hidden="true">/</span>
