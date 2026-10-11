@@ -18,6 +18,8 @@ Spec: `docs/BUILD_PROMPT.md`. State + next step: `docs/PROGRESS.md`.
 - `#lib/...` imports need the real extension: `#lib/i18n/index.ts`, `#lib/config.ts`.
 - `Handle` type comes from `@sveltejs/kit/hooks`. `page.url.search` is not allowed in prerendered pages.
 - Git Bash on Windows mangles `/office-lab`: prefix commands with `MSYS_NO_PATHCONV=1`.
+- `vite preview` keeps serving the build it started with: restart it after every build (Playwright reuses a running one locally).
+- Workers have no `document`: pdf.js needs the OffscreenCanvas factories in `adapters/pdf/pdfjs.ts`; pdf-lib can't shape Arabic (draw text as PNG via `adapters/text-image.ts`).
 
 ## Commands (run in `web/`)
 ```
