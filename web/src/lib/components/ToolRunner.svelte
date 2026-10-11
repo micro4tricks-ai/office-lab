@@ -139,7 +139,7 @@
 									bind:value={options[opt.id]}
 								/>
 							{:else}
-								<span class="with-unit">
+								<span class="with-unit" dir="ltr">
 									<input
 										id="opt-{opt.id}"
 										type="number"
@@ -254,9 +254,13 @@
 		height: 22px;
 		accent-color: var(--accent);
 	}
+	/* Numbers read left-to-right in both languages; the unit sits at the end, outside the digits. */
 	.with-unit {
 		position: relative;
 		display: block;
+	}
+	.with-unit input {
+		padding-inline-end: 3rem;
 	}
 	.unit {
 		position: absolute;

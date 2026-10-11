@@ -36,7 +36,7 @@
 		return pct === 0 ? null : pct;
 	}
 	const pctText = (lang: Lang, n: number) =>
-		new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en', { signDisplay: 'always' }).format(n) + '%';
+		new Intl.NumberFormat(lang === 'ar' ? 'ar-EG' : 'en', { style: 'percent', signDisplay: 'always' }).format(n / 100);
 </script>
 
 <section class="results" aria-labelledby="results-title">
@@ -65,7 +65,7 @@
 							· {t(lang, 'result.after')}:
 							{formatSize(lang, total(item))}
 							{#if change(item) !== null}
-								<span class="pct" class:down={change(item)! < 0}>({pctText(lang, change(item)!)})</span>
+								<span class="pct" class:down={change(item)! < 0}>(<bdi>{pctText(lang, change(item)!)}</bdi>)</span>
 							{/if}
 							{#each item.outputs.filter((o) => o.note) as o}
 								<span class="note">· {t(lang, `note.${o.note!}`)}</span>

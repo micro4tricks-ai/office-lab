@@ -25,9 +25,11 @@ async function viaTiff(bytes: Uint8Array): Promise<ImageData> {
 	const UTIF = (await import('utif2')).default;
 	const buf = bytes.slice().buffer;
 	const ifds = UTIF.decode(buf);
-	const page = ifds.find((p) => p.width && p.height) ?? ifds[0];
+	// width/height are only filled in by decodeImage; before that they live in tags 256/257.
+	const dim = (p: (typeof ifds)[number], tag: string) => Number((p[tag] as number[] | undefined)?.[0]) || 0;
+	const page = ifds.find((p) => dim(p, 't256') && dim(p, 't257'));
 	if (!page) throw new ConvertError('corrupted');
-	guard(page.width as number, page.height as number);
+	guard(dim(page, 't256'), dim(page, 't257'));
 	UTIF.decodeImage(buf, page);
 	const rgba = UTIF.toRGBA8(page);
 	return new ImageData(new Uint8ClampedArray(rgba), page.width as number, page.height as number);

@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { t } from '../i18n';
+	import { formatList } from '../registry/tools';
 	import type { Lang, Tool } from '../registry/types';
 	import Icon from './Icon.svelte';
 
 	let { tool, lang, available }: { tool: Tool; lang: Lang; available: boolean } = $props();
 
-	const fmt = (list: string[]) =>
-		list.filter((f) => !f.includes('/')).map((f) => f.toUpperCase()).join(' · ');
+	const fmt = (list: string[]) => formatList(list, 4).join(' · ');
 </script>
 
 <a class="card" href={resolve('/[lang]/[tool]', { lang, tool: tool.id }) + '/'}>

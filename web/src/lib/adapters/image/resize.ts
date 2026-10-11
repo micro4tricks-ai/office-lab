@@ -34,16 +34,10 @@ const adapter: Adapter = {
 		} else {
 			const ow = Number(options.width) || 0;
 			const oh = Number(options.height) || 0;
-			const ratio = image.width / image.height;
 			if (options.keepRatio !== false) {
-				// Fit inside the box; an empty side follows the other.
-				if (ow && oh) {
-					const s = Math.min(ow / image.width, oh / image.height);
-					w = image.width * s;
-					h = image.height * s;
-				} else if (ow) [w, h] = [ow, ow / ratio];
-				else if (oh) [w, h] = [oh * ratio, oh];
-				else [w, h] = [image.width, image.height];
+				// Fit inside the box (an empty side follows the other) and never enlarge.
+				const s = Math.min(1, ow ? ow / image.width : Infinity, oh ? oh / image.height : Infinity);
+				[w, h] = [image.width * s, image.height * s];
 			} else [w, h] = [ow || image.width, oh || image.height];
 		}
 		const resized = await resize(image, w, h);

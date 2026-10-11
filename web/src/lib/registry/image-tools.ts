@@ -27,7 +27,7 @@ type Conv = { id: string; to: string; ar: string; en: string; descAr: string; de
 
 const converters: Conv[] = [
 	{ id: 'convert-to-jpg', to: 'jpg', ar: 'تحويل الصور إلى JPG', en: 'Convert images to JPG', q: 85, kw: ['jpg', 'jpeg', 'png to jpg', 'webp to jpg'],
-		descAr: 'حوّل PNG وWebP وHEIC وAVIF وTIFF وغيرها إلى JPG بالجودة التي تختارها.',
+		descAr: 'حوّل صور PNG، WebP، HEIC، AVIF، TIFF وغيرها إلى JPG بالجودة التي تختارها.',
 		descEn: 'Turn PNG, WebP, HEIC, AVIF, TIFF and more into JPG at the quality you choose.' },
 	{ id: 'convert-to-png', to: 'png', ar: 'تحويل الصور إلى PNG', en: 'Convert images to PNG', kw: ['png', 'jpg to png', 'webp to png', 'svg to png'],
 		descAr: 'حوّل أي صورة إلى PNG بدون فقد في الجودة، مع الحفاظ على الشفافية.',
@@ -132,9 +132,9 @@ export const imageTools: Tool[] = [
 					{ value: 'kb', label: { ar: 'حجم الملف (ك.ب)', en: 'File size (KB)' } }
 				]
 			},
-			{ id: 'width', type: 'number', label: { ar: 'العرض', en: 'Width' }, default: 1280, min: 0, max: 20000, unit: 'px', when: { id: 'mode', in: ['px'] } },
-			{ id: 'height', type: 'number', label: { ar: 'الارتفاع (0 = تلقائي)', en: 'Height (0 = auto)' }, default: 0, min: 0, max: 20000, unit: 'px', when: { id: 'mode', in: ['px'] } },
-			{ id: 'keepRatio', type: 'checkbox', label: { ar: 'الحفاظ على النسبة', en: 'Keep aspect ratio' }, default: true, when: { id: 'mode', in: ['px'] } },
+			{ id: 'width', type: 'number', label: { ar: 'العرض الأقصى', en: 'Max width' }, default: 1280, min: 0, max: 20000, unit: 'px', when: { id: 'mode', in: ['px'] } },
+			{ id: 'height', type: 'number', label: { ar: 'الارتفاع الأقصى (0 = تلقائي)', en: 'Max height (0 = auto)' }, default: 0, min: 0, max: 20000, unit: 'px', when: { id: 'mode', in: ['px'] } },
+			{ id: 'keepRatio', type: 'checkbox', label: { ar: 'الحفاظ على النسبة وعدم التكبير', en: 'Keep ratio, never enlarge' }, default: true, when: { id: 'mode', in: ['px'] } },
 			{ id: 'percent', type: 'range', label: { ar: 'النسبة', en: 'Percent' }, default: 50, min: 1, max: 200, unit: '%', when: { id: 'mode', in: ['percent'] } },
 			{ id: 'targetKB', type: 'number', label: { ar: 'الحجم المطلوب', en: 'Target size' }, default: 200, min: 5, max: 50000, unit: 'KB', when: { id: 'mode', in: ['kb'] } },
 			formatChoice(['png', 'avif']),

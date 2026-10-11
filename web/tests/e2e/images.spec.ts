@@ -73,9 +73,13 @@ test.describe('image tools', () => {
 
 	test('resize by pixels and to a target size in KB', async ({ page }) => {
 		await convert(page, 'resize-image', ['alpha.png'], async (p) => {
-			await p.getByLabel('Width').fill('64');
+			await p.getByLabel('Max width').fill('64');
 		});
 		expect(pngSize((await grab(page, 'alpha.png')).bytes)).toEqual([64, 48]);
+
+		// The default max width (1280) must not enlarge a small image.
+		await convert(page, 'resize-image', ['alpha.png']);
+		expect(pngSize((await grab(page, 'alpha.png')).bytes)).toEqual([128, 96]);
 
 		await convert(page, 'resize-image', ['photo.bmp'], async (p) => {
 			await p.getByLabel('Resize by').selectOption('kb');
