@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
+		"precheck": "node scripts/copy-assets.mjs",
 		"predev": "node scripts/copy-assets.mjs",
 		"prebuild": "node scripts/copy-assets.mjs",
 		"dev": "vite dev",
@@ -22,7 +23,6 @@
 		"@sveltejs/adapter-static": "^4.0.0",
 		"@sveltejs/kit": "^3.0.0",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
-		"@types/markdown-it": "^14.2.0",
 		"@types/node": "^26.6.5",
 		"@types/turndown": "^5.0.6",
 		"svelte": "^5.57.1",

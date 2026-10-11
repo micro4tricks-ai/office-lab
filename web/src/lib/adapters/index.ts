@@ -33,5 +33,6 @@ export const engines: Record<string, () => Promise<Adapter>> = {
 	'pdf-forms': lazy(() => import('./pdf/forms')),
 	'data-convert': lazy(() => import('./data/convert')),
 	'data-format': lazy(() => import('./data/format')),
-	'docx': lazy(() => import('./doc/docx'))
+	'docx': lazy(() => import('./doc/docx')),
+	'markdown': lazy(() => import('./doc/markdown'))
 };

@@ -14,3 +14,10 @@ for (const dir of ['cmaps', 'standard_fonts', 'wasm', 'iccs']) {
 	cpSync(join(pdfjs, dir), join(out, dir), { recursive: true });
 }
 console.log('copy-assets: pdf.js cmaps, fonts, wasm → static/pdfjs');
+
+// Paged.js polyfill (paginates Markdown → PDF before printing); its package hides dist/ from imports.
+const paged = join(root, 'static', 'pagedjs');
+rmSync(paged, { recursive: true, force: true });
+mkdirSync(paged, { recursive: true });
+cpSync(join(root, 'node_modules', 'pagedjs', 'dist', 'paged.polyfill.min.js'), join(paged, 'paged.polyfill.min.js'));
+console.log('copy-assets: Paged.js → static/pagedjs');

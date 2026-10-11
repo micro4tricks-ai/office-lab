@@ -64,6 +64,8 @@ export type OptionSpec = When &
 
 type ToolText = { title: string; desc: string; keywords: string[] };
 
+export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode';
+
 export type Tool = {
 	id: string;
 	category: Category;
@@ -84,5 +86,7 @@ export type Tool = {
 	combine?: { min: number; max?: number };
 	/** An interactive step before converting; it writes options.plan / .items / .fields. */
 	editor?: 'organize' | 'place' | 'form';
+	/** A page of its own instead of the file runner (editors, calculators, generators). */
+	widget?: WidgetKey;
 	i18n: Record<Lang, ToolText>;
 };

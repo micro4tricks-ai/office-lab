@@ -78,7 +78,8 @@ function mathPlugin(md: InstanceType<Libs['MarkdownIt']>, katex: Libs['katex']) 
 		state.line = line + 1;
 		return true;
 	});
-	md.renderer.rules.math_inline = (tokens, i) => tex(tokens[i].content, false);
+	// Isolated left-to-right, or "P = V × I" turns into "I × V = P" inside an Arabic sentence.
+	md.renderer.rules.math_inline = (tokens, i) => `<span class="math-inline" dir="ltr">${tex(tokens[i].content, false)}</span>`;
 	md.renderer.rules.math_block = (tokens, i) => `<div class="math" dir="ltr">${tex(tokens[i].content, true)}</div>\n`;
 }
 
