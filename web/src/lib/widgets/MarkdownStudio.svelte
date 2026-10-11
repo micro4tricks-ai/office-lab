@@ -2,12 +2,15 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { asset } from '$app/paths';
 	import Icon from '../components/Icon.svelte';
+	import { serverCapabilities } from '../config';
 	import { downloadFile } from '../download';
 	import { t } from '../i18n';
 	import { buildDocument, drawDiagrams, type Mode } from '../markdown/document';
+	import { packDocument } from '../markdown/pack';
 	import { renderMarkdown, type Rendered } from '../markdown/render';
 	import type { FontKey, PageOptions, Template } from '../markdown/templates';
-	import type { Lang } from '../registry/types';
+	import { ConvertError, type Lang } from '../registry/types';
+	import { sendToServer } from '../remote';
 	import { SAMPLE } from './markdown-sample';
 
 	let { lang }: { lang: Lang } = $props();
@@ -32,8 +35,13 @@
 	let rendered: Rendered | null = null;
 	let timer: ReturnType<typeof setTimeout> | undefined;
 	let printFrame: HTMLIFrameElement | null = null;
+	/** The server version prints to PDF in one click (same document, its own Chromium). */
+	let direct = $state(false);
+	let directBusy = $state(false);
+	let directError = $state('');
 
 	onMount(() => {
+		serverCapabilities().then((c) => (direct = c.has('html-to-pdf')));
 		let draft: string | null = null;
 		try {
 			draft = localStorage.getItem(DRAFT);
@@ -93,6 +101,23 @@
 		document.body.append(printFrame);
 	}
 
+	async function downloadPdf() {
+		directBusy = true;
+		directError = '';
+		try {
+			await render();
+			const doc = buildDocument(rendered!, $state.snapshot(opts), 'preview', lang, t(lang, 'md.toc'), PAGED);
+			const { index, assets } = await packDocument(doc);
+			const [pdf] = await sendToServer('html-to-pdf', { file: index, assets }, { background: true });
+			downloadFile({ ...pdf, name: `${name()}.pdf` });
+		} catch (e) {
+			directError = t(lang, `err.${e instanceof ConvertError ? e.code : 'unknown'}`, { mb: 100 });
+			if (!(e instanceof ConvertError)) console.error('[office-lab] markdown direct pdf:', e);
+		} finally {
+			directBusy = false;
+		}
+	}
+
 	const templates: Template[] = ['simple', 'report', 'cv', 'letter'];
 	const fonts: FontKey[] = ['cairo', 'amiri', 'naskh'];
 </script>
@@ -112,7 +137,13 @@
 		<button class="btn btn-primary" type="button" onclick={print} data-testid="md-print">
 			<Icon name="pdf" size={18} />{t(lang, 'md.print')}
 		</button>
+		{#if direct}
+			<button class="btn btn-primary" type="button" onclick={downloadPdf} disabled={directBusy} data-testid="md-direct">
+				<Icon name="download" size={18} />{t(lang, directBusy ? 'md.directBusy' : 'md.direct')}
+			</button>
+		{/if}
 	</div>
+	{#if directError}<p class="err" role="alert">{directError}</p>{/if}
 
 	<details class="settings" open>
 		<summary>{t(lang, 'md.settings')}</summary>
@@ -164,6 +195,10 @@
 </div>
 
 <style>
+	.err {
+		margin: 0;
+		color: var(--danger);
+	}
 	.studio {
 		display: grid;
 		gap: var(--space-4);

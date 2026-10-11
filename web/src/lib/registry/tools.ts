@@ -8,6 +8,7 @@ import { filesTools } from './files-tools';
 import { officeTools } from './office-tools';
 import { pdfExtraTools } from './pdf-extra-tools';
 import { pdfTools } from './pdf-tools';
+import { serverTools } from './server-tools';
 import type { Tool } from './types';
 
 /** Single source of truth: UI, routes, SEO pages and capability checks come from here. */
@@ -21,6 +22,7 @@ export const tools: Tool[] = [
 	...ocrTools,
 	...officeTools,
 	...filesTools,
+	...serverTools,
 	{
 		id: 'txt-to-html',
 		category: 'document',

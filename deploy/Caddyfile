@@ -1,0 +1,48 @@
+# Office Lab: the static site + /api → the conversion API. HTTPS is automatic when DOMAIN is a real
+# domain name pointing at this server; locally DOMAIN=:80 serves plain http://localhost.
+# (No ACME email: Let's Encrypt stopped sending expiry emails in 2025, and Caddy renews by itself.)
+
+{$DOMAIN::80} {
+	encode zstd gzip
+
+	header {
+		# Everything is self-hosted. 'unsafe-inline' scripts: SvelteKit's start-up script and the
+		# Markdown preview (an iframe document); 'wasm-unsafe-eval': image/PDF/OCR codecs;
+		# blob: workers: Tesseract. connect-src 'self' keeps files from being sent anywhere else.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'self' blob: data:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Embedder-Policy "require-corp"
+		Cross-Origin-Resource-Policy "same-origin"
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		-Server
+	}
+
+	handle /api/* {
+		request_body {
+			max_size {$BODY_MAX:130MB}
+		}
+		reverse_proxy api:8000 {
+			# Conversions can take minutes (OCR of a long scan, big ebooks).
+			transport http {
+				read_timeout 15m
+				write_timeout 15m
+			}
+		}
+	}
+
+	handle {
+		root * /srv
+		@immutable path /_app/immutable/*
+		header @immutable Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	handle_errors 404 {
+		root * /srv
+		rewrite * /404.html
+		file_server
+	}
+}

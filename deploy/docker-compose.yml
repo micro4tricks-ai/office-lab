@@ -1,0 +1,89 @@
+# Office Lab, full version: the site + the conversion API + Gotenberg (LibreOffice/Chromium).
+#   docker compose -f deploy/docker-compose.yml up -d --build      → http://localhost
+# Settings live in deploy/.env (copy .env.example). See deploy/HOSTINGER.md for a VPS.
+name: office-lab
+
+services:
+  caddy:
+    build:
+      context: ..
+      dockerfile: deploy/Caddy.Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN:-:80}
+      BODY_MAX: ${BODY_MAX:-130MB}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge, internal]
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build: ../server
+    environment:
+      MAX_MB: ${MAX_MB:-100}
+      RETENTION_MIN: ${RETENTION_MIN:-60}
+      RATE_LIMIT: ${RATE_LIMIT:-30/minute}
+      CONCURRENCY: ${CONCURRENCY:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      GOTENBERG_URL: http://gotenberg:3000
+    volumes:
+      - jobs:/work
+    tmpfs:
+      - /tmp:size=64m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    # Only Caddy can reach it; it has no route to the internet.
+    networks: [internal]
+    depends_on: [gotenberg]
+    restart: unless-stopped
+
+  gotenberg:
+    image: gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769
+    command:
+      - gotenberg
+      - --api-timeout=300s
+      - --log-level=warn
+      # SSRF guards: web pages and documents may not reach private/internal addresses.
+      - --chromium-deny-private-ips
+      - --libreoffice-deny-private-ips
+      - --chromium-clear-cache
+      - --chromium-clear-cookies
+      - --webhook-disable
+      - --api-disable-download-from
+      - --prometheus-disable-collect
+    security_opt: ["no-new-privileges:true"]
+    # internal: talks to the API; egress: fetches public pages for URL → PDF.
+    networks: [internal, egress]
+    restart: unless-stopped
+
+  # Optional uptime monitor: docker compose --profile monitoring up -d
+  # Open it through an SSH tunnel: ssh -L 3001:127.0.0.1:3001 root@SERVER → http://localhost:3001
+  uptime-kuma:
+    image: louislam/uptime-kuma:2@sha256:9912da7d7d9b6ddc0c2d904beb84d24689c1ed9c33b81419eb9008663a92a329
+    profiles: [monitoring]
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - kuma:/app/data
+    networks: [edge, internal]
+    restart: unless-stopped
+
+networks:
+  internal:
+    internal: true
+  edge: {}
+  egress: {}
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}
+  jobs: {}
+  kuma: {}

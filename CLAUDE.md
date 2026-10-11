@@ -30,6 +30,16 @@ npx vitest run                                # unit tests
 MSYS_NO_PATHCONV=1 BASE_PATH=/office-lab npx playwright test   # e2e (needs a build first)
 ```
 
+## Server version (Phase 4) — Docker Desktop is installed on this PC (WSL2)
+- Git Bash needs `export PATH="$PATH:/c/Program Files/Docker/Docker/resources/bin"` for `docker`.
+- Server code: `server/app` (tools in `app/tools/*.py`, ids = web registry ids; a vitest keeps them in step).
+- `cd server && .venv/Scripts/python -m pytest -q` → API tests (tool tests skip without converters).
+- Full stack: `docker compose -f deploy/docker-compose.yml up -d --build` → http://localhost.
+- Tool tests in the container: `docker build --target test -t office-lab-api:test server` then
+  `docker run --rm --network office-lab_internal office-lab-api:test` (stack up first).
+- e2e against the stack: `cd web && E2E_URL=http://localhost/ npx playwright test`.
+- Extract text from OCR'd Arabic PDFs with poppler (`pdftotext`), not PyMuPDF (it gives drawing order).
+
 ## Deploy
 - Push to `main` → CI (`ci.yml`) → only if green, `pages.yml` deploys → https://micro4tricks-ai.github.io/office-lab/
 - Runners pinned to `ubuntu-24.04` (not `ubuntu-latest`) so image migrations do not break CI by surprise.

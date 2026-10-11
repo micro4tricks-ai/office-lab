@@ -17,7 +17,19 @@ export type NoteKey =
 	| 'identical'
 	| 'ocr-limit';
 
-export type ErrorCode = 'wrong-type' | 'too-big' | 'password' | 'corrupted' | 'pages' | 'nothing' | 'unknown';
+export type ErrorCode =
+	| 'wrong-type'
+	| 'too-big'
+	| 'password'
+	| 'corrupted'
+	| 'pages'
+	| 'nothing'
+	| 'unknown'
+	// From the server version:
+	| 'options'
+	| 'busy'
+	| 'timeout'
+	| 'offline';
 
 export class ConvertError extends Error {
 	constructor(
@@ -65,7 +77,7 @@ export type OptionSpec = When &
 
 type ToolText = { title: string; desc: string; keywords: string[] };
 
-export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode';
+export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode' | 'web-capture';
 
 export type Tool = {
 	id: string;

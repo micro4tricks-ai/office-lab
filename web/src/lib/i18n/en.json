@@ -199,5 +199,17 @@
 	"w.bc.height": "Height",
 	"w.bc.text": "Show the number under the bars",
 	"w.bc.invalid": "This value does not fit {format} (e.g. EAN13 = 12 or 13 digits).",
-	"w.bc.hint": "EAN13 for retail products; CODE128 for any text or internal number."
+	"w.bc.hint": "EAN13 for retail products; CODE128 for any text or internal number.",
+	"err.options": "One of the options is not valid.",
+	"err.busy": "The server is busy right now. Try again in a minute.",
+	"err.timeout": "The conversion took too long. Try a smaller file.",
+	"err.offline": "Couldn't reach the server. Check your connection and try again.",
+	"w.web.url": "Page address",
+	"w.web.go": "Convert",
+	"w.web.working": "Opening the page…",
+	"w.web.note": "The server opens the page as a visitor: pages behind a login show what a logged-out visitor sees.",
+	"w.web.preview": "Screenshot preview",
+	"w.web.badUrl": "This address can't be opened. Enter a public web page such as https://example.com",
+	"md.direct": "Download PDF",
+	"md.directBusy": "Making the PDF…"
 }
