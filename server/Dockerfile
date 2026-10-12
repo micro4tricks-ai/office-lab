@@ -10,10 +10,10 @@ ENV DEBIAN_FRONTEND=noninteractive \
     QTWEBENGINE_CHROMIUM_FLAGS=--no-sandbox
 
 # calibre (ebooks), OCRmyPDF + Tesseract (Arabic, English, page orientation),
-# Ghostscript, qpdf, and fonts so Arabic renders in calibre's PDFs.
+# Ghostscript, qpdf, FFmpeg (audio/video), and fonts so Arabic renders in calibre's PDFs.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 python3-venv ca-certificates \
-        calibre ghostscript qpdf curl \
+        calibre ghostscript qpdf curl ffmpeg \
         ocrmypdf tesseract-ocr tesseract-ocr-ara tesseract-ocr-eng tesseract-ocr-osd \
         fonts-noto-core fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*

@@ -41,5 +41,7 @@ export const engines: Record<string, () => Promise<Adapter>> = {
 	'rename': lazy(() => import('./files/rename')),
 	'pdf-layout': lazy(() => import('./pdf/layout')),
 	'pdf-reshape': lazy(() => import('./pdf/reshape')),
-	'sheet-ops': lazy(() => import('./data/sheet-ops'))
+	'sheet-ops': lazy(() => import('./data/sheet-ops')),
+	media: lazy(() => import('./media/convert')),
+	'media-gif': lazy(() => import('./media/gif'))
 };

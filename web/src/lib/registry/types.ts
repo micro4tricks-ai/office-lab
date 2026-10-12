@@ -26,6 +26,8 @@ export type ErrorCode =
 	| 'pages'
 	| 'nothing'
 	| 'unknown'
+	// The browser can't decode or encode this audio/video codec.
+	| 'codec'
 	// From the server version:
 	| 'options'
 	| 'busy'

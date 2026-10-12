@@ -1,4 +1,5 @@
 import { onServer } from '../remote';
+import { MEDIA_HEIGHT, MEDIA_KBPS, MEDIA_QUALITY } from './media-tools';
 import type { OptionSpec, Tool } from './types';
 
 /**
@@ -350,6 +351,37 @@ export const serverTools: Tool[] = [
 		i18n: {
 			ar: { title: 'Word إلى LaTeX', desc: 'حوّل مستند Word أو ODT إلى ملف LaTeX جاهز للتعديل.', keywords: ['word', 'docx', 'latex', 'tex'] },
 			en: { title: 'Word to LaTeX', desc: 'Turn a Word or ODT document into an editable LaTeX file.', keywords: ['word', 'docx', 'latex', 'tex'] }
+		}
+	}),
+	server({
+		id: 'media-convert',
+		category: 'media',
+		from: ['mp4', 'm4v', 'mov', 'webm', 'mkv', 'avi', 'wmv', 'asf', 'flv', '3gp', '3g2', 'mpg', 'mpeg', 'ts', 'mts', 'm2ts', 'vob', 'ogv',
+			'mp3', 'wav', 'ogg', 'oga', 'opus', 'm4a', 'aac', 'flac', 'amr', 'wma', 'aif', 'aiff', 'ac3', 'caf', 'mka'],
+		to: ['mp4', 'webm', 'mp3', 'm4a', 'wav', 'ogg'],
+		options: [
+			{
+				id: 'to',
+				type: 'select',
+				label: { ar: 'حوّل إلى', en: 'Convert to' },
+				default: 'mp4',
+				choices: [
+					{ value: 'mp4', label: { ar: 'فيديو MP4 (H.264)', en: 'MP4 video (H.264)' } },
+					{ value: 'webm', label: { ar: 'فيديو WebM (VP9)', en: 'WebM video (VP9)' } },
+					{ value: 'mp3', label: { ar: 'صوت MP3', en: 'MP3 audio' } },
+					{ value: 'm4a', label: { ar: 'صوت M4A (AAC)', en: 'M4A audio (AAC)' } },
+					{ value: 'wav', label: { ar: 'صوت WAV', en: 'WAV audio' } },
+					{ value: 'ogg', label: { ar: 'صوت OGG (Opus)', en: 'OGG audio (Opus)' } }
+				]
+			},
+			{ ...MEDIA_QUALITY, when: { id: 'to', in: ['mp4', 'webm'] } },
+			{ ...MEDIA_HEIGHT, when: { id: 'to', in: ['mp4', 'webm'] } },
+			{ id: 'mute', type: 'checkbox', label: { ar: 'حذف الصوت', en: 'Remove the sound' }, default: false, when: { id: 'to', in: ['mp4', 'webm'] } },
+			{ ...MEDIA_KBPS, when: { id: 'to', in: ['mp3', 'm4a', 'ogg'] } }
+		],
+		i18n: {
+			ar: { title: 'محوّل الصوت والفيديو (FFmpeg)', desc: 'للملفات الكبيرة والصيغ القديمة: AVI وWMV وFLV و3GP وAMR وWMA إلى MP4 أو MP3 وغيرها، مع الضغط وتغيير الدقة.', keywords: ['ffmpeg', 'avi إلى mp4', 'wmv', 'amr إلى mp3', 'تحويل فيديو', '3gp'] },
+			en: { title: 'Audio & video converter (FFmpeg)', desc: 'For big files and old formats: AVI, WMV, FLV, 3GP, AMR, WMA to MP4, MP3 and more, with compression and resizing.', keywords: ['ffmpeg', 'avi to mp4', 'wmv to mp4', 'amr to mp3', 'video converter', '3gp'] }
 		}
 	})
 ];

@@ -3,7 +3,7 @@
 > Generated from `web/src/lib/registry/` — do not edit by hand. To refresh:
 > `cd web && UPDATE_FORMATS=1 npx vitest run formats`
 
-101 tools: 81 run in the browser (nothing is uploaded), 20 need the server version (Docker, see `deploy/`).
+111 tools: 90 run in the browser (nothing is uploaded), 21 need the server version (Docker, see `deploy/`).
 
 ## PDF (42)
 
@@ -145,3 +145,18 @@
 | `epub-to-pdf` EPUB to PDF | EPUB → PDF | server | Turn an EPUB book into an A4 PDF with page numbers, to print or read anywhere. |
 | `pdf-to-epub` PDF to EPUB | PDF → EPUB | server | Turn a text PDF into a reflowable EPUB for phones and e-readers. |
 | `mobi-to-epub` Kindle (MOBI/AZW3) to EPUB | MOBI / AZW3 / AZW → EPUB | server | Turn DRM-free Kindle books into EPUB to read in any app. |
+
+## Audio & video (10)
+
+| Tool | In → Out | Runs | What it does |
+|---|---|---|---|
+| `video-to-mp4` Convert video to MP4 | MP4 / M4V / MOV / WEBM / MKV → MP4 | browser | Turn iPhone MOV, WebM or MKV into MP4 that plays on any device and in WhatsApp — on your device, no upload. |
+| `video-to-webm` Convert video to WebM | MP4 / M4V / MOV / WEBM / MKV → WEBM | browser | WebM is an open, light format for websites (VP9 or AV1 with Opus). |
+| `compress-video` Compress video | MP4 / M4V / MOV / WEBM / MKV → same format | browser | Shrink a video for WhatsApp or email by lowering resolution and bitrate. The original is kept if it would not get smaller. |
+| `video-to-mp3` Extract audio from video | MP4 / M4V / MOV / WEBM / MKV → MP3 / M4A / WAV / OGG / FLAC | browser | Save the sound of any video as MP3, M4A or WAV — a lecture, a meeting or a clip. |
+| `convert-audio` Convert audio (MP3, WAV, M4A...) | MP3 / WAV / OGG / OGA / OPUS / M4A / AAC / FLAC → MP3 / M4A / WAV / OGG / FLAC | browser | Convert between MP3, WAV, M4A, OGG and FLAC — WhatsApp voice notes (OPUS) included. |
+| `trim-media` Trim video or audio | MP4 / M4V / MOV / WEBM / MKV / MP3 / WAV / OGG / OGA / OPUS / M4A / AAC / FLAC → same format | browser | Keep part of a video or audio file by setting a start and an end, usually without re-encoding. |
+| `mute-video` Remove sound from video | MP4 / M4V / MOV / WEBM / MKV → same format | browser | Take the audio out of a video without touching the picture, in seconds. |
+| `rotate-video` Rotate video | MP4 / M4V / MOV / WEBM / MKV → same format | browser | Fix a video filmed sideways or upside down. |
+| `video-to-gif` Video to GIF | MP4 / M4V / MOV / WEBM / MKV → GIF | browser | Make an animated GIF from a short part of a video, for slides and chats. |
+| `media-convert` Audio & video converter (FFmpeg) | MP4 / M4V / MOV / WEBM / MKV / AVI / WMV / ASF / FLV / 3GP / 3G2 / MPG / MPEG / TS / MTS / M2TS / VOB / OGV / MP3 / WAV / OGG / OGA / OPUS / M4A / AAC / FLAC / AMR / WMA / AIF / AIFF / AC3 / CAF / MKA → MP4 / WEBM / MP3 / M4A / WAV / OGG | server | For big files and old formats: AVI, WMV, FLV, 3GP, AMR, WMA to MP4, MP3 and more, with compression and resizing. |

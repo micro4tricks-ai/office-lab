@@ -44,6 +44,7 @@
 	"err.password": "The file is password-protected — enter the right password in the “Unlock PDF” tool.",
 	"err.corrupted": "The file is damaged or can't be read.",
 	"err.unknown": "Something went wrong during conversion.",
+	"err.codec": "This browser can't read or write this audio/video format. Try Chrome or Edge on a computer, or the server version.",
 	"footer.oss": "Open-source project",
 	"footer.source": "Source code",
 	"redirect.go": "Go to the site",
