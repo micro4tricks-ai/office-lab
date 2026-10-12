@@ -1,7 +1,8 @@
 # Progress
-Current phase: 5 — Polish, SEO, PWA
+Current phase: 6 — only when the owner asks (Phase 5 done)
 
 ## Done
+- [x] Phase 5 (2026-10-12) — SEO, PWA, tool chains, privacy/about, README screenshots; Lighthouse (local, mobile) home 94/100/100/100, tool page 94/100/100/100; 144 vitest + 179 playwright green
 - [x] Phase 0 (2026-10-11) — scaffold, registry, worker runner, UI shell, CI + Pages. Pages: https://micro4tricks-ai.github.io/office-lab/
 - [x] Phase 1 (2026-10-11) — 14 image tools, worker pool, 28 vitest + 49 playwright green
 - [x] Phase 2 (2026-10-11) — 21 PDF tools incl. organize / sign / edit / forms; 33 vitest + 90 playwright green
@@ -66,6 +67,16 @@ Current phase: 5 — Polish, SEO, PWA
 - [x] `docker compose -f deploy/docker-compose.yml up -d` → http://localhost with all tools; `docker compose config` valid
 - [x] `deploy/HOSTINGER.md` (Arabic) + `deploy/install-vps.sh` (shellcheck clean; not yet run on a real VPS)
 
+## Phase 5 checklist
+- [x] SEO: canonical + hreflang (ar/en/x-default), Open Graph + Twitter card, JSON-LD (WebSite, WebApplication + BreadcrumbList) on every prerendered page; sitemap.xml + robots.txt routes
+- [x] OG pictures per category + home (static/og, `scripts/make-images.mjs`), PWA icons
+- [x] docs/FORMATS.md generated from the registry (`formats.test.ts`, UPDATE_FORMATS=1)
+- [x] PWA: manifest (shortcuts, share_target), service worker, install button, offline for browser tools, "all tools offline" (~55 MB)
+- [x] Web Share Target → /share/ → tools (or a chain) that take the files
+- [x] Tool chains (/pipelines/): 5 ready-made, build your own, saved in the browser (no files, no passwords)
+- [x] Privacy + About pages, footer links; privacy badge already on every browser tool
+- [x] README with screenshots (`scripts/screenshots.mjs`)
+
 ## Owner requests after Phase 4 (2026-10-12)
 - [x] Layout fills big screens (container 106rem, fluid gutters, root font 16→18px)
 - [x] OCR: background normalisation + deskew + upscaling small images, Tesseract PSM 6 by default (columns option = PSM 3); text shown on the page with Copy; phone-photo fixture ≥90% (got 96%)
@@ -80,6 +91,11 @@ Current phase: 5 — Polish, SEO, PWA
 - Pro: `server/app/translate.py` in its own `translate` container (internal + egress), key only there, daily character budget, text never logged.
 
 ## Decisions / defaults used
+- Phase 5: `PUBLIC_SITE_ORIGIN` (Pages: github.io origin in ci/pages.yml; VPS: SITE_ORIGIN in .env, filled by install-vps.sh) gives absolute URLs. `__BASE_PATH__` define: Kit 3 has no `base` in $app/paths and SSR paths are relative.
+- Service worker in `src/service-worker/` (Kit 3 wants its own tsconfig; `npm run check` also runs tsc on it). Imports `$app/manifest`, `$app/env`, `$app/service-worker`. Pages network-first; `_app/immutable` + static engine files cache-first on first use; `ignoreVary` (preview sends Vary: Origin); 404.html kept even when served with status 404. Kit's manifest leaves out worker chunks → prerendered `offline-files.json` lists them. API and models/ are never touched.
+- First visit saves only the shell (~1 MB); everything else on use, or all at once on request / for the installed app — not 55 MB for every visitor.
+- Small CSS inlined (`inlineStyleThreshold: 8192`): a tool page linked 16 stylesheets (tool page performance 89 → 94).
+- Lighthouse 12 dropped the PWA category: "installable" is checked by the manifest e2e test instead.
 - Name: **Office Lab** / «المعمل» (owner renamed from Hawwil). Repo `micro4tricks-ai/office-lab`, local `C:\Users\Admin\projects\office-lab`.
 - SvelteKit **3** (what `sv create` installs now): config in `web/vite.config.ts`, `#lib/...` imports with file extensions.
 - `/` redirects to `/ar/` (or `/en/` if chosen before, saved in localStorage). `trailingSlash: 'always'` for Pages.
@@ -124,5 +140,6 @@ Current phase: 5 — Polish, SEO, PWA
 - CSP keeps 'unsafe-inline' for scripts (SvelteKit start-up script, Markdown preview iframe) — connect-src 'self' is what stops files leaving.
 
 ## Next step (exact)
-- Phase 5 (polish, SEO, PWA): read BUILD_PROMPT §6 Phase 5. Prerendered SEO page per tool and language, sitemap.xml + robots.txt, OG images; generate docs/FORMATS.md from the registry; PWA (offline for browser tools, Web Share Target); pipelines (chain tools, presets); privacy badge + privacy/about pages; README with screenshots. Accept: Lighthouse ≥ 90 in all four categories on home and one tool page; installable PWA.
+- All six phases' planned work is done except Phase 6, which waits for the owner (video/audio, background removal, WhatsApp → PDF, API keys, accounts).
+- Pages has no custom domain: Search Console wants robots.txt at the domain root, so submit sitemap.xml by hand (or move to the VPS domain).
 - Hosting the server version is the owner's call (Hostinger KVM 2+, guide in deploy/HOSTINGER.md). Docker Desktop is installed on this PC.

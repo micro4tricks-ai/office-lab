@@ -15,7 +15,9 @@ export default defineConfig({
 			},
 			adapter: adapter({ fallback: '404.html' }),
 			paths: { base },
-			prerender: { entries: ['*'] }
+			prerender: { entries: ['*'] },
+			// Small stylesheets go inline: a tool page linked ~16 of them, which delayed the first paint.
+			inlineStyleThreshold: 8192
 		})
 	],
 	// Workers code-split their lazy codecs, which needs ES-module workers.

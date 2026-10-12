@@ -5,6 +5,10 @@
 **المعمل** أدوات مجانية ومفتوحة المصدر لتحويل ملفات المكاتب ومعالجتها: الصور، وPDF، والمستندات، والبيانات.
 الأدوات التي تعمل في المتصفح لا ترفع ملفك إلى أي مكان؛ كل شيء يحدث على جهازك.
 
+![الصفحة الرئيسية للمعمل](docs/screenshots/home-ar.png)
+
+- **ثبّته كتطبيق** على الكمبيوتر أو الموبايل، ويعمل بدون إنترنت، ويستقبل الملفات من قائمة «مشاركة».
+- **سلاسل الأدوات:** عدة تحويلات بضغطة واحدة (مثل صور الآيفون ← JPG ← ضغط ← PDF واحد)، وتحفظ سلسلتك.
 - **النسخة الثابتة (المتصفح فقط):** تُنشر على GitHub Pages — https://micro4tricks-ai.github.io/office-lab/
 - **نسخة الخادم (Docker):** للتحويلات الثقيلة (Office ↔ PDF، PDF → Word، الكتب الإلكترونية، OCR للملفات الكبيرة…). التشغيل: `docker compose -f deploy/docker-compose.yml up -d --build` ثم http://localhost — والتركيب على VPS في `deploy/HOSTINGER.md`.
 
@@ -21,12 +25,23 @@ npm run dev
 
 > الحالة الحالية: 101 أداة (81 في المتصفح و20 في نسخة الخادم). راجع `docs/PROGRESS.md` و`docs/FORMATS.md`.
 
+| أداة (دمج PDF) | سلاسل الأدوات | على الموبايل |
+|---|---|---|
+| ![](docs/screenshots/tool-ar.png) | ![](docs/screenshots/chains-ar.png) | ![](docs/screenshots/phone-ar.png) |
+
 </div>
 
 ---
 
 **Office Lab** is a free, open-source toolkit for everyday office files — images, PDF, documents and data.
 Browser tools never upload your file: everything runs on your device.
+
+![Office Lab in English, dark mode](docs/screenshots/home-en-dark.png)
+
+- **Installable app (PWA):** works offline, and receives files from the phone's Share menu.
+- **Tool chains:** several conversions in one go (e.g. HEIC → JPG → compress → one PDF), saved as presets.
+- **SEO:** a prerendered page per tool and language, sitemap.xml, Open Graph pictures. Every tool and
+  format is listed in [`docs/FORMATS.md`](docs/FORMATS.md) (generated from the registry).
 
 - **Static site (browser-only):** deployed to GitHub Pages — https://micro4tricks-ai.github.io/office-lab/
 - **Server version (Docker):** heavy conversions (Office ↔ PDF, PDF → Word, ebooks, OCR for long scans…).
@@ -41,6 +56,8 @@ npm run dev            # http://localhost:5173
 npm run check          # type check
 npx vitest run         # unit tests
 npx playwright test    # end-to-end (after a build)
+node scripts/make-images.mjs                          # Open Graph pictures + app icons
+node scripts/screenshots.mjs http://localhost:4173/   # README screenshots (from a running preview)
 ```
 
 ### Layout

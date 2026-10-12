@@ -71,6 +71,8 @@ test.describe('spreadsheet chores through the UI', () => {
 
 /** On phones the studio shows one pane at a time: switch tabs when they are shown. */
 async function showPane(page: Page, name: 'الكتابة' | 'المعاينة') {
+	// The studio loads after the page: wait for it before asking whether the tabs are shown.
+	await page.getByTestId('md-preview').waitFor({ state: 'attached' });
 	const tab = page.getByRole('tab', { name });
 	if (await tab.isVisible()) await tab.click();
 }
