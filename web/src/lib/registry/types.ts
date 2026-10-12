@@ -78,7 +78,7 @@ export type OptionSpec = When &
 
 type ToolText = { title: string; desc: string; keywords: string[] };
 
-export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode' | 'web-capture' | 'invoice' | 'password';
+export type WidgetKey = 'markdown' | 'tafqeet' | 'hijri' | 'arabic-text' | 'vat' | 'qr' | 'barcode' | 'web-capture' | 'invoice' | 'password' | 'translate';
 
 export type Tool = {
 	id: string;

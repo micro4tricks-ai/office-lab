@@ -6,6 +6,7 @@ Current phase: 5 — Polish, SEO, PWA
 - [x] Phase 1 (2026-10-11) — 14 image tools, worker pool, 28 vitest + 49 playwright green
 - [x] Phase 2 (2026-10-11) — 21 PDF tools incl. organize / sign / edit / forms; 33 vitest + 90 playwright green
 - [x] Phase 3 + owner-requested extras (2026-10-11) — 73 tools in total; 116 vitest + 144 playwright green
+- [x] Document translation (2026-10-12) — on-device (Chrome Translator API, else OPUS-MT en↔ar in a worker), optional Claude on the server; 101 tools
 - [x] After Phase 4 (2026-10-12, owner's requests) — wider layout on big screens; OCR clean-up (phone photo 36% → 96% right); 9 tools from a PDF24 review → 100 tools (80 browser + 20 server)
 - [x] Phase 4 (2026-10-12) — server version: 18 server tools (91 in total); 121 vitest, 79 server pytest (28 tool tests in the container), Playwright 152 green against the Docker stack and 140 on the Pages build
 
@@ -70,6 +71,13 @@ Current phase: 5 — Polish, SEO, PWA
 - [x] OCR: background normalisation + deskew + upscaling small images, Tesseract PSM 6 by default (columns option = PSM 3); text shown on the page with Copy; phone-photo fixture ≥90% (got 96%)
 - [x] From the PDF24 list: redact, letterhead/overlay, page size, split in half, flatten, scanned-document look for images → PDF, invoice maker (ZATCA QR), password generator, convert anything to PDF (server), PDF to Excel (server)
 - Skipped on purpose (low value or covered already): photo collage, cards, job application, e-invoice XML (needs a per-country standard), PDF/A & signature validation, viewer preferences, bookmarks editor, PDF → PowerPoint
+
+## Translation (owner chose: free by default + optional Claude)
+- LibreTranslate was tried and dropped: ar→en returned "♪." and auto-detect mislabels batches.
+- Free: Chrome's built-in Translator (desktop Chrome; availability/create wrapped in timeouts — headless Chromium hangs) → fallback OPUS-MT (Xenova q8 ONNX, Apache-2.0) via transformers.js in `translate/mt.worker.ts`. Models (~240 MB) pinned + SHA-256 in `web/scripts/models.json`, fetched by `scripts/fetch-models.mjs` before dev/build, cached in CI; ONNX runtime self-hosted in static/ort.
+- Fixes for the small model: currency codes spelled out first, reversed digit groups ("750 4") put back.
+- Documents are rewritten in the browser (`translate/docs.ts`): Word paragraphs (+ bidi/rtl/bidiVisual in schema order), slides (rtl/algn), Excel shared/inline/str cells (+ rightToLeft), TXT/MD/SRT line-wise. PDF: server pdf-to-word first.
+- Pro: `server/app/translate.py` in its own `translate` container (internal + egress), key only there, daily character budget, text never logged.
 
 ## Decisions / defaults used
 - Name: **Office Lab** / «المعمل» (owner renamed from Hawwil). Repo `micro4tricks-ai/office-lab`, local `C:\Users\Admin\projects\office-lab`.
