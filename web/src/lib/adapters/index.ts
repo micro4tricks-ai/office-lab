@@ -43,5 +43,6 @@ export const engines: Record<string, () => Promise<Adapter>> = {
 	'pdf-reshape': lazy(() => import('./pdf/reshape')),
 	'sheet-ops': lazy(() => import('./data/sheet-ops')),
 	media: lazy(() => import('./media/convert')),
+	whatsapp: lazy(() => import('./doc/whatsapp')),
 	'media-gif': lazy(() => import('./media/gif'))
 };

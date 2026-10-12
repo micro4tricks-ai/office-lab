@@ -3,9 +3,9 @@
 > Generated from `web/src/lib/registry/` — do not edit by hand. To refresh:
 > `cd web && UPDATE_FORMATS=1 npx vitest run formats`
 
-111 tools: 90 run in the browser (nothing is uploaded), 21 need the server version (Docker, see `deploy/`).
+112 tools: 91 run in the browser (nothing is uploaded), 21 need the server version (Docker, see `deploy/`).
 
-## PDF (42)
+## PDF (43)
 
 | Tool | In → Out | Runs | What it does |
 |---|---|---|---|
@@ -40,6 +40,7 @@
 | `pdf-page-size` Change PDF page size | PDF → PDF | browser | Make every page A4 (or A3, A5, Letter) keeping proportions — before printing or uploading to a portal. |
 | `pdf-split-halves` Split PDF pages in half | PDF → PDF | browser | Turn scanned two-page spreads into single pages, in Arabic (right first) or English order. |
 | `flatten-pdf` Flatten PDF | PDF → PDF | browser | Lock form values and comments so they can’t be changed, or turn the pages into images like a printed scan. |
+| `whatsapp-to-pdf` WhatsApp chat to PDF | TXT / ZIP → PDF | browser | Turn an exported WhatsApp chat (TXT, or the ZIP with photos) into a searchable PDF with bubbles, names, dates and pictures — to keep or submit. |
 | `word-to-pdf` Word to PDF | DOCX / DOC / ODT / RTF → PDF | server | Turn Word, ODT and RTF documents into PDF with their layout and Arabic fonts, using LibreOffice. |
 | `excel-to-pdf` Excel to PDF | XLSX / XLS / ODS → PDF | server | Turn Excel and ODS spreadsheets into PDF, optionally one page per sheet. Formulas are calculated first. |
 | `powerpoint-to-pdf` PowerPoint to PDF | PPTX / PPT / PPSX / PPS / ODP → PDF | server | Turn presentations into PDF, one slide per page. |

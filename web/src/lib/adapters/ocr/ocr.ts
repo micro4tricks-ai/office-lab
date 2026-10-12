@@ -1,5 +1,3 @@
-import amiriArabic from '@fontsource/amiri/files/amiri-arabic-400-normal.woff?url';
-import amiriLatin from '@fontsource/amiri/files/amiri-latin-400-normal.woff?url';
 import type { PDFDocument, PDFFont, PDFPage } from '@cantoo/pdf-lib';
 import { ConvertError, type Adapter, type FileData } from '../../registry/types';
 import { decodeImage } from '../image/decode';
@@ -7,6 +5,7 @@ import { encodeImage, encodePng } from '../image/encode';
 import { sniff } from '../image/formats';
 import { loadPdf, pdfLib, savePdf } from '../pdf/lib';
 import { toUser, visualSize } from '../pdf/place';
+import { embedPlainFonts as embedFonts } from '../pdf/text-layer';
 import { openPdf } from '../pdf/pdfjs';
 import { renderPage } from '../pdf/render';
 import { grayToRgba, prepareForOcr, toOriginal } from './prepare';
@@ -77,22 +76,6 @@ async function textLayer(page: PDFPage, r: PageResult, fonts: { ar: PDFFont; en:
 		const { x, y, rot } = toUser(page, word.x0 * sx, H - word.y1 * sy + h * 0.15);
 		page.drawText(word.text, { x, y, size, font, opacity: 0, rotate: degrees(rot) });
 	}
-}
-
-async function embedFonts(doc: PDFDocument) {
-	const fontkit = (await import('@pdf-lib/fontkit')).default;
-	doc.registerFontkit(fontkit);
-	const load = async (url: string) => new Uint8Array(await (await fetch(url)).arrayBuffer());
-	// The layer is invisible, so no shaping: one plain glyph per character keeps the
-	// ToUnicode map exact (shaped Arabic glyphs extract as garbage).
-	const off = Object.fromEntries(
-		['init', 'medi', 'fina', 'isol', 'liga', 'rlig', 'calt', 'ccmp', 'mark', 'mkmk', 'curs', 'kern', 'locl'].map((f) => [f, false])
-	);
-	return {
-		// Whole fonts (~160 KB): fontkit's subsetter fails on these WOFF files.
-		ar: await doc.embedFont(await load(amiriArabic), { subset: false, features: off }),
-		en: await doc.embedFont(await load(amiriLatin), { subset: false, features: off })
-	};
 }
 
 /** Image or scanned PDF → text (TXT) or a searchable PDF, in Arabic, English or both. */
