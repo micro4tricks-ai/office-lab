@@ -26,6 +26,10 @@ export type ErrorCode =
 	| 'pages'
 	| 'nothing'
 	| 'unknown'
+	// The browser can't decode or encode this audio/video codec.
+	| 'codec'
+	// Needs WebGPU (a model too slow on the CPU).
+	| 'gpu'
 	// From the server version:
 	| 'options'
 	| 'busy'

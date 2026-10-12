@@ -1,7 +1,8 @@
 # Progress
-Current phase: 6 — only when the owner asks (Phase 5 done)
+Current phase: done through 6 (accounts/payments = later, planned separately)
 
 ## Done
+- [x] Phase 6 (2026-10-12, owner asked) — audio/video, WhatsApp → PDF, background removal + upscaling, API keys; 114 tools (93 browser + 21 server); 156 vitest, 205 playwright on the Pages build, 114 against the Docker stack, 100 server pytest in the container
 - [x] Phase 5 (2026-10-12) — SEO, PWA, tool chains, privacy/about, README screenshots; Lighthouse (local, mobile) home 94/100/100/100, tool page 94/100/100/100; 144 vitest + 179 playwright green
 - [x] Phase 0 (2026-10-11) — scaffold, registry, worker runner, UI shell, CI + Pages. Pages: https://micro4tricks-ai.github.io/office-lab/
 - [x] Phase 1 (2026-10-11) — 14 image tools, worker pool, 28 vitest + 49 playwright green
@@ -77,6 +78,16 @@ Current phase: 6 — only when the owner asks (Phase 5 done)
 - [x] Privacy + About pages, footer links; privacy badge already on every browser tool
 - [x] README with screenshots (`scripts/screenshots.mjs`)
 
+## Phase 6 checklist
+- [x] Audio/video in the browser (Mediabunny + WebCodecs, MPL-2.0): to MP4/WebM, compress, extract audio, convert audio (WhatsApp OPUS too), trim, mute, rotate, video → GIF (gifenc); MP3/AAC WASM encoders only when the browser lacks them
+- [x] Server `media-convert` (FFmpeg): big files + AVI/WMV/FLV/3GP/AMR/WMA; demuxer + protocol whitelists (no playlists)
+- [x] WhatsApp chat → PDF: Android/iPhone, Arabic/English exports, TXT or ZIP with photos; bubbles, day separators, page numbers; searchable text layer
+- [x] Background removal: MODNet (people, 7 MB, ~5 s CPU); BiRefNet lite (anything, 115 MB) only with WebGPU
+- [x] Upscale ×2/×4: Real-ESRGAN general x4v3 (4.9 MB, ONNX verified against the official weights), tiled, ≤ 1000 px input
+- [x] API keys (`API_KEYS` hashes, `KEY_RATE_LIMIT`, `python -m app.keys new`), `/[lang]/api/` page from the registry
+- [x] Fix found on the way: invisible text layers (OCR + chat PDFs) embedded WOFF, which Acrobat/MuPDF can't read → converted to TrueType
+- [ ] Accounts and payments: the commercial phase, to be planned separately (spec §6)
+
 ## Owner requests after Phase 4 (2026-10-12)
 - [x] Layout fills big screens (container 106rem, fluid gutters, root font 16→18px)
 - [x] OCR: background normalisation + deskew + upscaling small images, Tesseract PSM 6 by default (columns option = PSM 3); text shown on the page with Copy; phone-photo fixture ≥90% (got 96%)
@@ -91,6 +102,12 @@ Current phase: 6 — only when the owner asks (Phase 5 done)
 - Pro: `server/app/translate.py` in its own `translate` container (internal + egress), key only there, daily character budget, text never logged.
 
 ## Decisions / defaults used
+- Phase 6: video stays in the browser up to 500 MB (bytes in memory); WebCodecs codecs vary by browser → error `codec` points to Chrome/Edge or the server tool. MP4 prefers H.264 (plays everywhere).
+- ffmpeg.wasm not used: its core is GPL and 30 MB; Mediabunny uses the browser's own encoders.
+- Swin2SR tried for upscaling and dropped: ~50 s for a 125 px image on the CPU; Real-ESRGAN compact takes ~3 s.
+- BiRefNet on WASM ran > 4 minutes: refused without WebGPU (`err.gpu`) instead of hanging; headless browsers have no WebGPU, so it isn't covered by e2e.
+- Models now ~370 MB in static/models (Pages limit 1 GB). The SW never caches models; the browser's HTTP/transformers cache does.
+- Chat PDFs: pages drawn on canvas (JPEG, ~150 KB/page) + invisible Amiri text, digits as ASCII (readers reverse Arabic-Indic digits in RTL runs).
 - Phase 5: `PUBLIC_SITE_ORIGIN` (Pages: github.io origin in ci/pages.yml; VPS: SITE_ORIGIN in .env, filled by install-vps.sh) gives absolute URLs. `__BASE_PATH__` define: Kit 3 has no `base` in $app/paths and SSR paths are relative.
 - Service worker in `src/service-worker/` (Kit 3 wants its own tsconfig; `npm run check` also runs tsc on it). Imports `$app/manifest`, `$app/env`, `$app/service-worker`. Pages network-first; `_app/immutable` + static engine files cache-first on first use; `ignoreVary` (preview sends Vary: Origin); 404.html kept even when served with status 404. Kit's manifest leaves out worker chunks → prerendered `offline-files.json` lists them. API and models/ are never touched.
 - First visit saves only the shell (~1 MB); everything else on use, or all at once on request / for the installed app — not 55 MB for every visitor.
@@ -140,6 +157,6 @@ Current phase: 6 — only when the owner asks (Phase 5 done)
 - CSP keeps 'unsafe-inline' for scripts (SvelteKit start-up script, Markdown preview iframe) — connect-src 'self' is what stops files leaving.
 
 ## Next step (exact)
-- All six phases' planned work is done except Phase 6, which waits for the owner (video/audio, background removal, WhatsApp → PDF, API keys, accounts).
+- Planned work is done except accounts/payments (commercial phase, needs its own plan with the owner).
 - Pages has no custom domain: Search Console wants robots.txt at the domain root, so submit sitemap.xml by hand (or move to the VPS domain).
 - Hosting the server version is the owner's call (Hostinger KVM 2+, guide in deploy/HOSTINGER.md). Docker Desktop is installed on this PC.

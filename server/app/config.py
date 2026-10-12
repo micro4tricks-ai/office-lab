@@ -19,6 +19,11 @@ class Settings:
     concurrency: int = field(default_factory=lambda: _int("CONCURRENCY", os.cpu_count() or 2))
     queue_wait_s: int = field(default_factory=lambda: _int("QUEUE_WAIT_S", 60))
     rate_limit: str = field(default_factory=lambda: os.environ.get("RATE_LIMIT", "30/minute"))
+    # API keys for other programs ("name:sha256,..." — see app/keys.py) and their limit, per key.
+    api_keys: list[str] = field(
+        default_factory=lambda: [k.strip() for k in os.environ.get("API_KEYS", "").split(",") if k.strip()]
+    )
+    key_rate_limit: str = field(default_factory=lambda: os.environ.get("KEY_RATE_LIMIT", "120/minute"))
     tmp_root: Path = field(
         default_factory=lambda: Path(os.environ.get("TMP_ROOT", tempfile.gettempdir())) / "office-lab-jobs"
     )

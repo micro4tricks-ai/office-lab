@@ -20,5 +20,27 @@
 			"onnx/encoder_model_quantized.onnx": "d9b0d612acff86cf87634b49bda566d1ef39b312837de549786ea18fecefc708",
 			"onnx/decoder_model_merged_quantized.onnx": "cdb25ae736afe9d48035b0ea311ab4b25f315810fab7f3c6f6cb0d8d87af35fa"
 		}
+	},
+	"Xenova/modnet": {
+		"revision": "fa2fa546052fba4c08921230a26cc69a333fca12",
+		"files": {
+			"config.json": "e144d8af9b1f09649785c77f592a76bbc69504ae02e43700663b2a9f00d9c8a2",
+			"preprocessor_config.json": "07d83634b1fdd20142ca6e3fe55ab92b558f56d1b0f005ff3a7926f1c9e1165d",
+			"onnx/model_quantized.onnx": "92e49898c3e05a6d7a944fc67a8cb87c4aad754ffb6ebd949528c7d1105fee3a"
+		}
+	},
+	"onnx-community/BiRefNet_lite-ONNX": {
+		"revision": "de15b22ba131738a16dff04aab8bdf8dc32e3ac1",
+		"files": {
+			"config.json": "50acd2d700ee3d5facdcf3aab2312bb586372726dce8bdd5741bdae0ca6eb84f",
+			"preprocessor_config.json": "447d9ccb2c4129ab0ca045fc293e7d79dbc45e293ac1e94818d865db77f65a54",
+			"onnx/model_fp16.onnx": "d39b897ceb16ae654c1731f3dba0cf9b368d9cae74b5a57459b455cc8bfec402"
+		}
+	},
+	"CoderViking/realesr-general-x4v3-onnx": {
+		"revision": "c6a971706797c7502945a2b4c4274fce4900d4ab",
+		"files": {
+			"realesr-general-x4v3.onnx": "1940a93ee08283a0a7286183186357b1688fe9fa8ede74604b424586aaddf112"
+		}
 	}
 }

@@ -9,6 +9,7 @@ STATUS = {
     "nothing": 422,
     "bad-options": 422,
     "not-found": 404,
+    "bad-key": 401,
     "busy": 503,
     "timeout": 504,
     "unknown": 500,

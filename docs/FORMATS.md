@@ -3,9 +3,9 @@
 > Generated from `web/src/lib/registry/` — do not edit by hand. To refresh:
 > `cd web && UPDATE_FORMATS=1 npx vitest run formats`
 
-101 tools: 81 run in the browser (nothing is uploaded), 20 need the server version (Docker, see `deploy/`).
+114 tools: 93 run in the browser (nothing is uploaded), 21 need the server version (Docker, see `deploy/`).
 
-## PDF (42)
+## PDF (43)
 
 | Tool | In → Out | Runs | What it does |
 |---|---|---|---|
@@ -40,6 +40,7 @@
 | `pdf-page-size` Change PDF page size | PDF → PDF | browser | Make every page A4 (or A3, A5, Letter) keeping proportions — before printing or uploading to a portal. |
 | `pdf-split-halves` Split PDF pages in half | PDF → PDF | browser | Turn scanned two-page spreads into single pages, in Arabic (right first) or English order. |
 | `flatten-pdf` Flatten PDF | PDF → PDF | browser | Lock form values and comments so they can’t be changed, or turn the pages into images like a printed scan. |
+| `whatsapp-to-pdf` WhatsApp chat to PDF | TXT / ZIP → PDF | browser | Turn an exported WhatsApp chat (TXT, or the ZIP with photos) into a searchable PDF with bubbles, names, dates and pictures — to keep or submit. |
 | `word-to-pdf` Word to PDF | DOCX / DOC / ODT / RTF → PDF | server | Turn Word, ODT and RTF documents into PDF with their layout and Arabic fonts, using LibreOffice. |
 | `excel-to-pdf` Excel to PDF | XLSX / XLS / ODS → PDF | server | Turn Excel and ODS spreadsheets into PDF, optionally one page per sheet. Formulas are calculated first. |
 | `powerpoint-to-pdf` PowerPoint to PDF | PPTX / PPT / PPSX / PPS / ODP → PDF | server | Turn presentations into PDF, one slide per page. |
@@ -52,7 +53,7 @@
 | `compress-pdf-strong` Strong PDF compression | PDF → PDF | server | Stronger compression with Ghostscript, or pick a target size (e.g. 2 MB for an upload portal). |
 | `repair-pdf` Repair PDF | PDF → PDF | server | Try to fix a damaged PDF that won’t open by recovering what can still be read. |
 
-## Images (14)
+## Images (16)
 
 | Tool | In → Out | Runs | What it does |
 |---|---|---|---|
@@ -69,6 +70,8 @@
 | `watermark-image` Watermark images | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → JPG / PNG / WEBP / AVIF | browser | Put Arabic or English text, or your logo, on images — once or tiled. |
 | `favicon-generator` Favicon generator | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → ICO / PNG | browser | From one image: favicon.ico, every size from 16 to 512, a web manifest and the ready-to-paste HTML. |
 | `image-to-svg` Image to SVG (vectorize) | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → SVG | browser | Turn logos and drawings into SVG that scales without blur — for print and cutting. |
+| `remove-background` Remove image background | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → PNG | browser | Take the background out of portraits and product photos with on-device AI — transparent, white or a colour you pick. |
+| `upscale-image` Upscale image with AI | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → PNG | browser | Enlarge small or old pictures ×2 or ×4 (up to 1000 px) with sharper detail instead of blur — Real-ESRGAN on your device. |
 | `url-to-image` Website screenshot | own page → PNG / JPG / WEBP | server | Capture any web page as an image, as it looks on a desktop or a phone. |
 
 ## Documents (10)
@@ -145,3 +148,18 @@
 | `epub-to-pdf` EPUB to PDF | EPUB → PDF | server | Turn an EPUB book into an A4 PDF with page numbers, to print or read anywhere. |
 | `pdf-to-epub` PDF to EPUB | PDF → EPUB | server | Turn a text PDF into a reflowable EPUB for phones and e-readers. |
 | `mobi-to-epub` Kindle (MOBI/AZW3) to EPUB | MOBI / AZW3 / AZW → EPUB | server | Turn DRM-free Kindle books into EPUB to read in any app. |
+
+## Audio & video (10)
+
+| Tool | In → Out | Runs | What it does |
+|---|---|---|---|
+| `video-to-mp4` Convert video to MP4 | MP4 / M4V / MOV / WEBM / MKV → MP4 | browser | Turn iPhone MOV, WebM or MKV into MP4 that plays on any device and in WhatsApp — on your device, no upload. |
+| `video-to-webm` Convert video to WebM | MP4 / M4V / MOV / WEBM / MKV → WEBM | browser | WebM is an open, light format for websites (VP9 or AV1 with Opus). |
+| `compress-video` Compress video | MP4 / M4V / MOV / WEBM / MKV → same format | browser | Shrink a video for WhatsApp or email by lowering resolution and bitrate. The original is kept if it would not get smaller. |
+| `video-to-mp3` Extract audio from video | MP4 / M4V / MOV / WEBM / MKV → MP3 / M4A / WAV / OGG / FLAC | browser | Save the sound of any video as MP3, M4A or WAV — a lecture, a meeting or a clip. |
+| `convert-audio` Convert audio (MP3, WAV, M4A...) | MP3 / WAV / OGG / OGA / OPUS / M4A / AAC / FLAC → MP3 / M4A / WAV / OGG / FLAC | browser | Convert between MP3, WAV, M4A, OGG and FLAC — WhatsApp voice notes (OPUS) included. |
+| `trim-media` Trim video or audio | MP4 / M4V / MOV / WEBM / MKV / MP3 / WAV / OGG / OGA / OPUS / M4A / AAC / FLAC → same format | browser | Keep part of a video or audio file by setting a start and an end, usually without re-encoding. |
+| `mute-video` Remove sound from video | MP4 / M4V / MOV / WEBM / MKV → same format | browser | Take the audio out of a video without touching the picture, in seconds. |
+| `rotate-video` Rotate video | MP4 / M4V / MOV / WEBM / MKV → same format | browser | Fix a video filmed sideways or upside down. |
+| `video-to-gif` Video to GIF | MP4 / M4V / MOV / WEBM / MKV → GIF | browser | Make an animated GIF from a short part of a video, for slides and chats. |
+| `media-convert` Audio & video converter (FFmpeg) | MP4 / M4V / MOV / WEBM / MKV / AVI / WMV / ASF / FLV / 3GP / 3G2 / MPG / MPEG / TS / MTS / M2TS / VOB / OGV / MP3 / WAV / OGG / OGA / OPUS / M4A / AAC / FLAC / AMR / WMA / AIF / AIFF / AC3 / CAF / MKA → MP4 / WEBM / MP3 / M4A / WAV / OGG | server | For big files and old formats: AVI, WMV, FLV, 3GP, AMR, WMA to MP4, MP3 and more, with compression and resizing. |

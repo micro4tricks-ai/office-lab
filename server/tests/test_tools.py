@@ -250,3 +250,16 @@ def test_pandoc_cannot_read_server_files(client):
 
 def test_same_format_is_refused(client, epub):
     assert convert(client, "ebook-convert", ("a.epub", epub), {"to": "epub"}, expect=422).json() == {"code": "bad-options"}
+
+def test_media_avi_to_mp4_and_voice_to_mp3(client):
+    mp4 = convert(client, "media-convert", "clip.avi", {"to": "mp4", "height": 120}).content
+    assert mp4[4:8] == b"ftyp"
+    mp3 = convert(client, "media-convert", "voice.ogg", {"to": "mp3"}).content
+    assert mp3[:3] == b"ID3" or mp3[0] == 0xFF
+    assert convert(client, "media-convert", "voice.ogg", {"to": "mp4"}, expect=422).json() == {"code": "bad-options"}
+
+def test_media_playlist_cannot_read_server_files(client):
+    playlist = b"#EXTM3U\n#EXT-X-TARGETDURATION:1\n#EXTINF:1,\nfile:///etc/passwd\n#EXT-X-ENDLIST\n"
+    r = client.post("/api/convert/media-convert", files={"file": ("x.mp4", playlist)}, data={"options": json.dumps({"to": "mp3"})})
+    assert r.status_code != 200
+    no_secrets(r.text)

@@ -32,6 +32,8 @@ services:
       MAX_MB: ${MAX_MB:-100}
       RETENTION_MIN: ${RETENTION_MIN:-60}
       RATE_LIMIT: ${RATE_LIMIT:-30/minute}
+      API_KEYS: ${API_KEYS:-}
+      KEY_RATE_LIMIT: ${KEY_RATE_LIMIT:-120/minute}
       CONCURRENCY: ${CONCURRENCY:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-}
       GOTENBERG_URL: http://gotenberg:3000
