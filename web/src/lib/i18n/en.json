@@ -45,6 +45,7 @@
 	"err.corrupted": "The file is damaged or can't be read.",
 	"err.unknown": "Something went wrong during conversion.",
 	"err.codec": "This browser can't read or write this audio/video format. Try Chrome or Edge on a computer, or the server version.",
+	"err.gpu": "This option needs a browser with WebGPU (Chrome or Edge on a computer). Choose “A person” instead, or try another browser.",
 	"footer.oss": "Open-source project",
 	"footer.source": "Source code",
 	"redirect.go": "Go to the site",

@@ -34,3 +34,8 @@ declare module 'gifenc' {
 		bytes(): Uint8Array;
 	};
 }
+
+// The WebGPU (JSEP) build, the same as transformers.js and static/ort; its types are onnxruntime-common's.
+declare module 'onnxruntime-web/webgpu' {
+	export * from 'onnxruntime-common';
+}

@@ -70,6 +70,7 @@
 		"markdown-it": "^15.0.2",
 		"mediabunny": "^1.61.3",
 		"mermaid": "^12.1.0",
+		"onnxruntime-web": "^1.22.0-dev.20250409-89f8206ba4",
 		"pagedjs": "^0.4.3",
 		"pdfjs-dist": "^6.4.299",
 		"qrcode-generator": "^2.0.4",

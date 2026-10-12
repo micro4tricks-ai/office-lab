@@ -3,7 +3,7 @@
 > Generated from `web/src/lib/registry/` — do not edit by hand. To refresh:
 > `cd web && UPDATE_FORMATS=1 npx vitest run formats`
 
-112 tools: 91 run in the browser (nothing is uploaded), 21 need the server version (Docker, see `deploy/`).
+114 tools: 93 run in the browser (nothing is uploaded), 21 need the server version (Docker, see `deploy/`).
 
 ## PDF (43)
 
@@ -53,7 +53,7 @@
 | `compress-pdf-strong` Strong PDF compression | PDF → PDF | server | Stronger compression with Ghostscript, or pick a target size (e.g. 2 MB for an upload portal). |
 | `repair-pdf` Repair PDF | PDF → PDF | server | Try to fix a damaged PDF that won’t open by recovering what can still be read. |
 
-## Images (14)
+## Images (16)
 
 | Tool | In → Out | Runs | What it does |
 |---|---|---|---|
@@ -70,6 +70,8 @@
 | `watermark-image` Watermark images | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → JPG / PNG / WEBP / AVIF | browser | Put Arabic or English text, or your logo, on images — once or tiled. |
 | `favicon-generator` Favicon generator | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → ICO / PNG | browser | From one image: favicon.ico, every size from 16 to 512, a web manifest and the ready-to-paste HTML. |
 | `image-to-svg` Image to SVG (vectorize) | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → SVG | browser | Turn logos and drawings into SVG that scales without blur — for print and cutting. |
+| `remove-background` Remove image background | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → PNG | browser | Take the background out of portraits and product photos with on-device AI — transparent, white or a colour you pick. |
+| `upscale-image` Upscale image with AI | JPG / PNG / WEBP / AVIF / GIF / BMP / TIFF / SVG / ICO / HEIC / JXL → PNG | browser | Enlarge small or old pictures ×2 or ×4 (up to 1000 px) with sharper detail instead of blur — Real-ESRGAN on your device. |
 | `url-to-image` Website screenshot | own page → PNG / JPG / WEBP | server | Capture any web page as an image, as it looks on a desktop or a phone. |
 
 ## Documents (10)

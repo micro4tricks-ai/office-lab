@@ -302,5 +302,73 @@ export const imageTools: Tool[] = [
 			ar: { title: 'تحويل صورة إلى SVG (متجهات)', desc: 'حوّل الشعارات والرسومات إلى SVG يكبر بلا تشويش — مناسب للطباعة والقص بالليزر.', keywords: ['svg', 'vector', 'متجه', 'vectorize'] },
 			en: { title: 'Image to SVG (vectorize)', desc: 'Turn logos and drawings into SVG that scales without blur — for print and cutting.', keywords: ['svg', 'vector', 'vectorize', 'trace'] }
 		}
+	},
+	{
+		id: 'remove-background',
+		category: 'image',
+		from: IMAGE_INPUTS,
+		to: ['png'],
+		runtime: 'browser',
+		engine: 'image-ai',
+		load: inWorker('image-ai'),
+		params: { action: 'remove-bg' },
+		options: [
+			{
+				id: 'model',
+				type: 'select',
+				label: { ar: 'ما في الصورة', en: 'What is in the picture' },
+				default: 'person',
+				choices: [
+					{ value: 'person', label: { ar: 'شخص (صورة شخصية) — سريع، 7 ميجا', en: 'A person (portrait) — fast, 7 MB' } },
+					{ value: 'any', label: { ar: 'أي شيء (منتج، شعار...) — 115 ميجا، يحتاج WebGPU', en: 'Anything (product, logo...) — 115 MB, needs WebGPU' } }
+				]
+			},
+			{
+				id: 'background',
+				type: 'select',
+				label: { ar: 'الخلفية الجديدة', en: 'New background' },
+				default: 'transparent',
+				choices: [
+					{ value: 'transparent', label: { ar: 'شفافة (PNG)', en: 'Transparent (PNG)' } },
+					{ value: 'white', label: { ar: 'بيضاء (لصور الهوية)', en: 'White (ID photos)' } },
+					{ value: 'color', label: { ar: 'لون أختاره', en: 'A colour I choose' } }
+				]
+			},
+			{ id: 'color', type: 'color', label: { ar: 'اللون', en: 'Colour' }, default: '#1e5aa8', when: { id: 'background', in: ['color'] } }
+		],
+		maxMB: 30,
+		batch: true,
+		i18n: {
+			ar: { title: 'إزالة خلفية الصورة', desc: 'احذف الخلفية من الصور الشخصية وصور المنتجات بالذكاء الاصطناعي على جهازك — خلفية شفافة أو بيضاء أو بلون تختاره.', keywords: ['إزالة الخلفية', 'حذف خلفية الصورة', 'remove background', 'خلفية بيضاء', 'صورة شخصية'] },
+			en: { title: 'Remove image background', desc: 'Take the background out of portraits and product photos with on-device AI — transparent, white or a colour you pick.', keywords: ['remove background', 'background remover', 'transparent background', 'remove bg'] }
+		}
+	},
+	{
+		id: 'upscale-image',
+		category: 'image',
+		from: IMAGE_INPUTS,
+		to: ['png'],
+		runtime: 'browser',
+		engine: 'image-ai',
+		load: inWorker('image-ai'),
+		params: { action: 'upscale' },
+		options: [
+			{
+				id: 'factor',
+				type: 'select',
+				label: { ar: 'التكبير', en: 'Enlarge' },
+				default: '2',
+				choices: [
+					{ value: '2', label: { ar: '×2 (ضعف المقاس)', en: '×2 (double size)' } },
+					{ value: '4', label: { ar: '×4 (أربعة أضعاف)', en: '×4 (four times)' } }
+				]
+			}
+		],
+		maxMB: 20,
+		batch: true,
+		i18n: {
+			ar: { title: 'تكبير الصورة بالذكاء الاصطناعي', desc: 'كبّر الصور الصغيرة أو القديمة ×2 أو ×4 (حتى 1000 بكسل) بتفاصيل أوضح بدل التشويش، بنموذج Real-ESRGAN على جهازك.', keywords: ['تكبير الصورة', 'تحسين جودة الصورة', 'upscale', 'رفع دقة الصورة'] },
+			en: { title: 'Upscale image with AI', desc: 'Enlarge small or old pictures ×2 or ×4 (up to 1000 px) with sharper detail instead of blur — Real-ESRGAN on your device.', keywords: ['upscale image', 'image enhancer', 'increase resolution', 'ai upscaler'] }
+		}
 	}
 ];
