@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import Header from '#lib/components/Header.svelte';
 	import { REPO_URL } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
@@ -24,6 +25,10 @@
 			{t(lang, 'app.name')} · {t(lang, 'footer.oss')} (AGPL-3.0) ·
 			<a href={REPO_URL} rel="noopener">{t(lang, 'footer.source')}</a>
 		</p>
+		<p class="links">
+			<a href={resolve('/[lang]/about', { lang }) + '/'}>{t(lang, 'footer.about')}</a>
+			<a href={resolve('/[lang]/privacy', { lang }) + '/'}>{t(lang, 'footer.privacy')}</a>
+		</p>
 	</div>
 </footer>
 
@@ -38,8 +43,20 @@
 		color: var(--muted);
 		font-size: 0.9rem;
 	}
+	footer .container {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--space-2) var(--space-6);
+	}
 	footer a {
 		display: inline-block;
 		padding-block: var(--space-2);
+	}
+	.links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2) var(--space-6);
 	}
 </style>

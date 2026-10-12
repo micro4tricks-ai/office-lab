@@ -29,3 +29,10 @@ describe('SEO', () => {
 			for (const l of ['ar', 'en']) expect(existsSync(`static/og/${name}-${l}.jpg`), `${name}-${l}`).toBe(true);
 	});
 });
+
+describe('routes', () => {
+	it('no tool id collides with a fixed page under /{lang}/', () => {
+		const fixed = [...EXTRA_PAGES.map((p) => p.replace('/', '')), 'share'];
+		for (const t of tools) expect(fixed, t.id).not.toContain(t.id);
+	});
+});
