@@ -63,7 +63,10 @@ describe('tool chains', () => {
 		await expect(runChain([{ tool: tool('merge-pdf'), options: {} }], [file('a.pdf')], run)).rejects.toMatchObject({ code: 'nothing' });
 	});
 
-	it('saved chains keep plain option values only (no picked files)', () => {
+	it('saved chains keep plain option values only (no picked files, never a password)', () => {
+		expect(storableSteps([{ tool: 'protect-pdf', options: { password: 'secret', allowPrint: false } }])).toEqual([
+			{ tool: 'protect-pdf', options: { allowPrint: false } }
+		]);
 		const logo: FileData = file('logo.png', 'image/png');
 		expect(storableSteps([{ tool: 'watermark-pdf', options: { kind: 'logo', logo, opacity: 30 } }])).toEqual([
 			{ tool: 'watermark-pdf', options: { kind: 'logo', opacity: 30 } }

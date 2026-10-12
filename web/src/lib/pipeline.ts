@@ -139,7 +139,7 @@ export const PRESETS: Chain[] = [
 
 const KEY = 'chains';
 
-/** Chains the visitor saved (in this browser only). Picked files (logos) are not kept. */
+/** Chains the visitor saved (in this browser only). Picked files (logos) and passwords are not kept. */
 export function loadChains(): Chain[] {
 	try {
 		const list = JSON.parse(localStorage.getItem(KEY) ?? '[]') as Chain[];
@@ -150,10 +150,15 @@ export function loadChains(): Chain[] {
 }
 
 export function storableSteps(steps: Step[]): Step[] {
-	return steps.map((s) => ({
-		tool: s.tool,
-		options: Object.fromEntries(Object.entries(s.options).filter(([, v]) => v === null || typeof v !== 'object'))
-	}));
+	return steps.map((s) => {
+		const secret = new Set((toolById(s.tool)?.options ?? []).filter((o) => o.type === 'text' && o.secret).map((o) => o.id));
+		return {
+			tool: s.tool,
+			options: Object.fromEntries(
+				Object.entries(s.options).filter(([id, v]) => !secret.has(id) && (v === null || typeof v !== 'object'))
+			)
+		};
+	});
 }
 
 export function saveChains(list: Chain[]) {
