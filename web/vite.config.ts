@@ -15,7 +15,9 @@ export default defineConfig({
 			},
 			adapter: adapter({ fallback: '404.html' }),
 			paths: { base },
-			prerender: { entries: ['*'] }
+			prerender: { entries: ['*'] },
+			// Small stylesheets go inline: a tool page linked ~16 of them, which delayed the first paint.
+			inlineStyleThreshold: 8192
 		})
 	],
 	// Workers code-split their lazy codecs, which needs ES-module workers.
@@ -26,7 +28,11 @@ export default defineConfig({
 	},
 	define: {
 		// Empty = no server: server tools show the "server version" badge.
-		__API_URL__: JSON.stringify(process.env.PUBLIC_API_URL ?? '')
+		__API_URL__: JSON.stringify(process.env.PUBLIC_API_URL ?? ''),
+		// Origin for canonical links, sitemap and og:image (e.g. https://micro4tricks-ai.github.io).
+		__SITE_ORIGIN__: JSON.stringify(process.env.PUBLIC_SITE_ORIGIN ?? ''),
+		// The base path as a plain string ($app/paths has no `base` in Kit 3, and SSR paths are relative).
+		__BASE_PATH__: JSON.stringify(base)
 	},
 	test: {
 		include: ['tests/unit/**/*.test.ts']

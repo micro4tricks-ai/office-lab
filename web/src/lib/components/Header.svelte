@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
 	import { t } from '../i18n';
+	import { install, promptInstall } from '../install.svelte';
 	import type { Lang } from '../registry/types';
 	import Icon from './Icon.svelte';
 
@@ -58,6 +59,12 @@
 				<Icon name="globe" />
 				<span>{t(lang, 'nav.lang')}</span>
 			</a>
+			{#if install.offer}
+				<button class="icon-btn lang" type="button" onclick={promptInstall} aria-label={t(lang, 'install.label')}>
+					<Icon name="download" />
+					<span>{t(lang, 'install.btn')}</span>
+				</button>
+			{/if}
 			<button
 				class="icon-btn"
 				type="button"

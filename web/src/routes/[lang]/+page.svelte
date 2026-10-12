@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 	import Icon from '#lib/components/Icon.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import { absolute, BASE as base } from '#lib/seo.ts';
 	import ToolCard from '#lib/components/ToolCard.svelte';
 	import { serverCapabilities } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
@@ -41,10 +44,21 @@
 	);
 </script>
 
-<svelte:head>
-	<title>{t(lang, 'app.name')} — {t(lang, 'app.tagline')}</title>
-	<meta name="description" content={t(lang, 'app.description')} />
-</svelte:head>
+<Seo
+	{lang}
+	title="{t(lang, 'app.name')} — {t(lang, 'app.tagline')}"
+	desc={t(lang, 'app.description')}
+	path=""
+	data={{
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: t(lang, 'app.name'),
+		alternateName: lang === 'ar' ? 'Office Lab' : 'المعمل',
+		description: t(lang, 'app.description'),
+		inLanguage: lang,
+		url: absolute(`${base}/${lang}/`)
+	}}
+/>
 
 <section class="hero">
 	<div class="container">
@@ -61,6 +75,7 @@
 				autocomplete="off"
 			/>
 		</div>
+		<a class="cta" href={resolve('/[lang]/pipelines', { lang }) + '/'}><Icon name="chain" size={18} />{t(lang, 'pipe.cta')}</a>
 	</div>
 </section>
 
@@ -197,5 +212,13 @@
 		text-align: center;
 		color: var(--muted);
 		padding: var(--space-8) 0;
+	}
+	.cta {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+		padding-block: var(--space-2);
+		font-weight: 600;
 	}
 </style>

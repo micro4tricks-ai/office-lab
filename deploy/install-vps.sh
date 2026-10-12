@@ -58,6 +58,7 @@ if [ ! -f "$ENV" ]; then
 			exit 1
 		fi
 		sed -i "s|^DOMAIN=.*|DOMAIN=$domain|" "$ENV"
+		sed -i "s|^SITE_ORIGIN=.*|SITE_ORIGIN=https://$domain|" "$ENV"
 	fi
 	chmod 600 "$ENV"
 fi

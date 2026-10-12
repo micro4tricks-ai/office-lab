@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
+	import { absolute, BASE, SITE_ORIGIN } from '#lib/seo.ts';
 
 	// Arabic by default; English only if the visitor chose it before.
 	onMount(() => {
@@ -14,6 +15,7 @@
 
 <svelte:head>
 	<title>المعمل · Office Lab</title>
+	{#if SITE_ORIGIN}<link rel="canonical" href={absolute(`${BASE}/ar/`)} />{/if}
 	<noscript><meta http-equiv="refresh" content="0; url=./ar/" /></noscript>
 </svelte:head>
 
