@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { tools } from '../../src/lib/registry/tools';
 import { CATEGORIES } from '../../src/lib/registry/types';
 import { existsSync } from 'node:fs';
-import { EXTRA_PAGES, jsonLd, robots, sitemap, sitePaths } from '../../src/lib/seo';
+import { EXTRA_PAGES, jsonLd, robots, sitemap, SITE_ORIGIN, sitePaths } from '../../src/lib/seo';
 
 describe('SEO', () => {
 	it('lists every tool and page in both languages, with alternates', () => {
@@ -10,8 +10,8 @@ describe('SEO', () => {
 		const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 		expect(locs).toHaveLength(sitePaths().length * 2);
 		expect(sitePaths()).toHaveLength(1 + tools.length + EXTRA_PAGES.length);
-		for (const t of tools) for (const l of ['ar', 'en']) expect(locs).toContain(`/office-lab/${l}/${t.id}/`);
-		expect(xml).toContain('hreflang="x-default" href="/office-lab/ar/merge-pdf/"');
+		for (const t of tools) for (const l of ['ar', 'en']) expect(locs).toContain(`${SITE_ORIGIN}/office-lab/${l}/${t.id}/`);
+		expect(xml).toContain(`hreflang="x-default" href="${SITE_ORIGIN}/office-lab/ar/merge-pdf/"`);
 		expect(new Set(locs).size).toBe(locs.length);
 	});
 
