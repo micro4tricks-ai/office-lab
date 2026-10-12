@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import OfflineReady from '#lib/components/OfflineReady.svelte';
 	import Seo from '#lib/components/Seo.svelte';
 	import { REPO_URL } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
@@ -9,6 +10,8 @@
 	let { data }: PageProps = $props();
 	const lang = $derived(data.lang);
 	const server = tools.filter((x) => x.runtime === 'server').length;
+	/** Roughly what "all tools offline" downloads (build files + PDF/OCR engines; measured 2026-10). */
+	const OFFLINE_MB = 55;
 	const n = (v: number) => v.toLocaleString(lang === 'ar' ? 'ar-EG' : 'en');
 </script>
 
@@ -28,6 +31,10 @@
 
 	<h2>{t(lang, 'about.install.h')}</h2>
 	<p>{t(lang, 'about.install.p')}</p>
+
+	<h2>{t(lang, 'about.offline.h')}</h2>
+	<p>{t(lang, 'about.offline.p', { mb: n(OFFLINE_MB) })}</p>
+	<OfflineReady {lang} />
 
 	<h2>{t(lang, 'about.credits.h')}</h2>
 	<p>{t(lang, 'about.credits.p')}</p>

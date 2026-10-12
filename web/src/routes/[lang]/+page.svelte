@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 	import Icon from '#lib/components/Icon.svelte';
 	import Seo from '#lib/components/Seo.svelte';
 	import { absolute, BASE as base } from '#lib/seo.ts';
@@ -74,6 +75,7 @@
 				autocomplete="off"
 			/>
 		</div>
+		<a class="cta" href={resolve('/[lang]/pipelines', { lang }) + '/'}><Icon name="chain" size={18} />{t(lang, 'pipe.cta')}</a>
 	</div>
 </section>
 
@@ -210,5 +212,13 @@
 		text-align: center;
 		color: var(--muted);
 		padding: var(--space-8) 0;
+	}
+	.cta {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+		padding-block: var(--space-2);
+		font-weight: 600;
 	}
 </style>

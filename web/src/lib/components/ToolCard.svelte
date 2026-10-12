@@ -5,12 +5,17 @@
 	import type { Lang, Tool } from '../registry/types';
 	import Icon from './Icon.svelte';
 
-	let { tool, lang, available }: { tool: Tool; lang: Lang; available: boolean } = $props();
+	let {
+		tool,
+		lang,
+		available,
+		onpick
+	}: { tool: Tool; lang: Lang; available: boolean; /** Runs before the link is followed. */ onpick?: () => void } = $props();
 
 	const fmt = (list: string[]) => formatList(list, 4).join(' · ');
 </script>
 
-<a class="card" href={resolve('/[lang]/[tool]', { lang, tool: tool.id }) + '/'}>
+<a class="card" href={resolve('/[lang]/[tool]', { lang, tool: tool.id }) + '/'} onclick={onpick}>
 	<span class="icon"><Icon name={tool.category} size={22} /></span>
 	<h3>{tool.i18n[lang].title}</h3>
 	<p class="desc">{tool.i18n[lang].desc}</p>
