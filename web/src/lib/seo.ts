@@ -14,7 +14,7 @@ export const BASE: string = __BASE_PATH__;
 export const SITE_ORIGIN: string = __SITE_ORIGIN__.replace(/\/+$/, '');
 
 /** Pages outside the tool list, under /{lang}/ (no leading slash, trailing slash). */
-export const EXTRA_PAGES = ['pipelines/', 'about/', 'privacy/'] as const;
+export const EXTRA_PAGES = ['pipelines/', 'about/', 'privacy/', 'api/'] as const;
 
 /** Every indexable path after /{lang}/: '' is the home page. */
 export const sitePaths = (): string[] => ['', ...tools.map((t) => `${t.id}/`), ...EXTRA_PAGES];

@@ -22,6 +22,7 @@ from starlette.background import BackgroundTask
 from . import gotenberg, tools  # noqa: F401  (tools: registers every server tool)
 from .config import settings
 from .errors import ToolError
+from .keys import key_name
 from .jobs import check_zip, new_job_dir, remove, save_upload, sweeper
 from .registry import TOOLS, Job
 
@@ -49,7 +50,20 @@ async def lifespan(app: FastAPI):
     task.cancel()
 
 
-limiter = Limiter(key_func=get_remote_address)
+def rate_key(request: Request) -> str:
+    """Requests with a valid API key are counted per key, the rest per IP address."""
+    try:
+        name = key_name(request)
+    except ToolError:
+        name = None  # refused in the endpoint
+    return f"key:{name}" if name else get_remote_address(request)
+
+
+def rate_for(key: str) -> str:
+    return settings.key_rate_limit if key.startswith("key:") else settings.rate_limit
+
+
+limiter = Limiter(key_func=rate_key)
 app = FastAPI(title="Office Lab API", lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 app.state.limiter = limiter
 if settings.cors_origins:
@@ -117,7 +131,7 @@ def safe_stem(name: str) -> str:
 
 
 @app.post("/api/convert/{tool_id}")
-@limiter.limit(lambda: settings.rate_limit)
+@limiter.limit(rate_for)
 async def convert(
     request: Request,
     tool_id: str,
@@ -126,6 +140,7 @@ async def convert(
     url: Annotated[str | None, Form()] = None,
     options: Annotated[str, Form()] = "{}",
 ):
+    key_name(request)  # a wrong key is refused, not quietly treated as anonymous
     tool = TOOLS.get(tool_id)
     if tool is None:
         raise ToolError("not-found")

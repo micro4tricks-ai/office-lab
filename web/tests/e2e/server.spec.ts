@@ -37,6 +37,19 @@ test.describe('server tools', () => {
 		expect(out.bytes.subarray(0, 4).toString()).toBe('%PDF');
 	});
 
+	test('an old AVI → MP4 with FFmpeg, and a voice note → MP3', async ({ page }) => {
+		await convert(page, 'media-convert', 'clip.avi');
+		const mp4 = await grab(page);
+		expect(mp4.name).toBe('clip.mp4');
+		expect(mp4.bytes.subarray(4, 8).toString()).toBe('ftyp');
+		await page.goto('en/media-convert/');
+		await page.getByTestId('file-input').setInputFiles(fx('voice.ogg'));
+		await page.getByLabel('Convert to').selectOption('mp3');
+		await page.getByRole('button', { name: 'Convert', exact: true }).click();
+		await expect(page.locator('[data-status="done"]')).toHaveCount(1, { timeout: 150_000 });
+		expect((await grab(page)).name).toBe('voice.mp3');
+	});
+
 	test('strong compression to a target size', async ({ page }) => {
 		await page.goto('en/compress-pdf-strong/');
 		await page.getByTestId('file-input').setInputFiles(fx('photo.pdf'));

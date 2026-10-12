@@ -33,6 +33,7 @@
 			<a href={resolve('/[lang]/pipelines', { lang }) + '/'}>{t(lang, 'footer.pipelines')}</a>
 			<a href={resolve('/[lang]/about', { lang }) + '/'}>{t(lang, 'footer.about')}</a>
 			<a href={resolve('/[lang]/privacy', { lang }) + '/'}>{t(lang, 'footer.privacy')}</a>
+			<a href={resolve('/[lang]/api', { lang }) + '/'}>{t(lang, 'footer.api')}</a>
 		</p>
 	</div>
 </footer>

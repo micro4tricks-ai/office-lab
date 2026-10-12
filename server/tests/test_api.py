@@ -196,3 +196,31 @@ def test_upload_streaming_stops_at_limit(tmp_path):
     up = UploadFile(io.BytesIO(b"x" * 5000), filename="a")
     with pytest.raises(ToolError):
         asyncio.run(save_upload(up, tmp_path / "o", limit=4096))
+
+
+def test_api_keys(client, monkeypatch):
+    from app import keys
+
+    key, line = keys.new("office-1")
+    assert key.startswith("olab_") and key not in line  # only the hash is stored
+    monkeypatch.setattr(settings, "api_keys", [line])
+    monkeypatch.setattr(settings, "rate_limit", "1/minute")
+    monkeypatch.setattr(settings, "key_rate_limit", "3/minute")
+    send = lambda headers: client.post("/api/convert/echo", files={"file": ("a.txt", b"hi")}, headers=headers)  # noqa: E731
+    # A key gets its own, bigger allowance; both header forms work.
+    for headers in ({"Authorization": f"Bearer {key}"}, {"X-API-Key": key}, {"Authorization": f"Bearer {key}"}):
+        assert send(headers).status_code == 200
+    assert send({"X-API-Key": key}).json() == {"code": "busy"}
+    # A wrong key is refused, never quietly treated as anonymous.
+    r = send({"Authorization": "Bearer olab_wrong"})
+    assert r.status_code == 401 and r.json() == {"code": "bad-key"}
+
+
+def test_new_key_cli_refuses_odd_names():
+    import subprocess
+    import sys
+
+    out = subprocess.run([sys.executable, "-m", "app.keys", "new", "a b"], capture_output=True, text=True)
+    assert out.returncode != 0
+    out = subprocess.run([sys.executable, "-m", "app.keys", "new", "office-2"], capture_output=True, text=True)
+    assert out.returncode == 0 and "office-2:" in out.stdout
