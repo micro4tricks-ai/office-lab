@@ -29,6 +29,8 @@ jobs:
       # Empty = no server. To use a server version's API from Pages, set the repository
       # variable PUBLIC_API_URL (and CORS_ORIGINS on the server): see deploy/HOSTINGER.md.
       PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
+      # For canonical links, sitemap.xml and link previews (a custom domain: set the variable).
+      PUBLIC_SITE_ORIGIN: ${{ vars.PUBLIC_SITE_ORIGIN || 'https://micro4tricks-ai.github.io' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

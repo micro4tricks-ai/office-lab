@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import Header from '#lib/components/Header.svelte';
 	import { REPO_URL } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
@@ -13,14 +12,7 @@
 		document.documentElement.lang = lang;
 		document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 	});
-
-	const alt = (l: string) => page.url.pathname.replace(/\/(ar|en)(\/|$)/, `/${l}$2`);
 </script>
-
-<svelte:head>
-	<link rel="alternate" hreflang="ar" href={alt('ar')} />
-	<link rel="alternate" hreflang="en" href={alt('en')} />
-</svelte:head>
 
 <Header {lang} />
 <main id="main" tabindex="-1">

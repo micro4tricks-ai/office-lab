@@ -8,6 +8,8 @@ services:
     build:
       context: ..
       dockerfile: deploy/Caddy.Dockerfile
+      args:
+        PUBLIC_SITE_ORIGIN: ${SITE_ORIGIN:-}
     ports:
       - "80:80"
       - "443:443"

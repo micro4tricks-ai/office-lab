@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '#lib/components/Icon.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import { absolute, BASE as base } from '#lib/seo.ts';
 	import ToolCard from '#lib/components/ToolCard.svelte';
 	import { serverCapabilities } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
@@ -41,10 +43,21 @@
 	);
 </script>
 
-<svelte:head>
-	<title>{t(lang, 'app.name')} — {t(lang, 'app.tagline')}</title>
-	<meta name="description" content={t(lang, 'app.description')} />
-</svelte:head>
+<Seo
+	{lang}
+	title="{t(lang, 'app.name')} — {t(lang, 'app.tagline')}"
+	desc={t(lang, 'app.description')}
+	path=""
+	data={{
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: t(lang, 'app.name'),
+		alternateName: lang === 'ar' ? 'Office Lab' : 'المعمل',
+		description: t(lang, 'app.description'),
+		inLanguage: lang,
+		url: absolute(`${base}/${lang}/`)
+	}}
+/>
 
 <section class="hero">
 	<div class="container">

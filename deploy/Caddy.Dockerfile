@@ -6,6 +6,9 @@ RUN npm ci --no-audit --no-fund
 COPY web/ ./
 # 'self': the API is at /api on this same site.
 ENV PUBLIC_API_URL=self
+# https://your-domain, for the sitemap, canonical links and link previews (from SITE_ORIGIN in .env).
+ARG PUBLIC_SITE_ORIGIN=
+ENV PUBLIC_SITE_ORIGIN=$PUBLIC_SITE_ORIGIN
 RUN npm run build
 
 FROM caddy:2.11.7@sha256:f2a1290d0463aad60660d4ec134943f183ee2a5f6c3eb7bf32dd984f2f020772

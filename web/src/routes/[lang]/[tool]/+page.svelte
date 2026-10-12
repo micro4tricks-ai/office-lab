@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import Icon from '#lib/components/Icon.svelte';
+	import Seo from '#lib/components/Seo.svelte';
+	import { absolute, BASE as base } from '#lib/seo.ts';
 	import ToolRunner from '#lib/components/ToolRunner.svelte';
 	import { serverCapabilities } from '#lib/config.ts';
 	import { t } from '#lib/i18n/index.ts';
@@ -21,9 +23,36 @@
 	const usable = $derived(tool.runtime === 'browser' || serverOk);
 </script>
 
+<Seo
+	{lang}
+	title="{text.title} — {t(lang, 'app.name')}"
+	desc={text.desc}
+	path="{tool.id}/"
+	image={tool.category}
+	data={[
+		{
+			'@context': 'https://schema.org',
+			'@type': 'WebApplication',
+			name: text.title,
+			description: text.desc,
+			url: absolute(`${base}/${lang}/${tool.id}/`),
+			inLanguage: lang,
+			applicationCategory: 'UtilitiesApplication',
+			operatingSystem: 'Any (web browser)',
+			isAccessibleForFree: true,
+			offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' }
+		},
+		{
+			'@context': 'https://schema.org',
+			'@type': 'BreadcrumbList',
+			itemListElement: [
+				{ '@type': 'ListItem', position: 1, name: t(lang, 'nav.home'), item: absolute(`${base}/${lang}/`) },
+				{ '@type': 'ListItem', position: 2, name: text.title, item: absolute(`${base}/${lang}/${tool.id}/`) }
+			]
+		}
+	]}
+/>
 <svelte:head>
-	<title>{text.title} — {t(lang, 'app.name')}</title>
-	<meta name="description" content={text.desc} />
 	<meta name="keywords" content={text.keywords.join(', ')} />
 </svelte:head>
 

@@ -285,5 +285,7 @@
 	"tr.stage.translating": "Translating…",
 	"tr.stage.pdf": "Turning the PDF into Word first…",
 	"tr.done": "Done — same layout as your file.",
-	"tr.review": "Machine translation can be wrong: review it before sending, especially numbers, names and legal terms."
+	"tr.review": "Machine translation can be wrong: review it before sending, especially numbers, names and legal terms.",
+	"og.tools": "{n} free tools",
+	"og.local": "{n} run on your device"
 }
