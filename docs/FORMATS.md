@@ -1,7 +1,7 @@
 # Supported tools and formats
 
 > From `web/src/lib/registry/` (a generator comes in Phase 5 — until then, keep in sync by hand).
-> 100 tools: 80 run in the browser (nothing is uploaded), 20 need the server version (Docker, see `deploy/`).
+> 101 tools: 81 run in the browser (nothing is uploaded), 20 need the server version (Docker, see `deploy/`).
 
 Image inputs: JPG/JPEG/JFIF, PNG, WebP, AVIF, GIF (first frame), BMP, TIFF, SVG, ICO, HEIC/HEIF, JXL.
 Spreadsheet inputs: XLSX, XLSM, XLS, ODS, CSV/TSV (UTF-8 or Windows-1256), JSON arrays.
@@ -28,13 +28,14 @@ Spreadsheet inputs: XLSX, XLSM, XLS, ODS, CSV/TSV (UTF-8 or Windows-1256), JSON 
 `compress-image` · `resize-image` · `crop-rotate-image` · `remove-image-metadata` · `watermark-image` ·
 `favicon-generator` (ICO + PNG set + manifest) · `image-to-svg`
 
-## Documents (6)
+## Documents (7)
 | Tool | In → Out |
 |---|---|
 | `markdown-to-pdf` | Markdown editor → PDF via print (4 templates, Arabic) |
 | `markdown-to-html` · `markdown-to-word` | MD → HTML / DOCX |
 | `word-to-html` · `word-to-markdown` | DOCX → HTML / MD |
 | `txt-to-html` | TXT → HTML |
+| `translate-document` | DOCX / PPTX / XLSX / TXT / MD / SRT (+ PDF on the server version) → same format, English ↔ Arabic (French via Chrome or Claude); free on-device (Chrome translator, else OPUS-MT in the browser) or Claude on the server |
 
 ## Data & spreadsheets (16)
 | Tool | In → Out |

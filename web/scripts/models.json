@@ -1,0 +1,24 @@
+{
+	"Xenova/opus-mt-en-ar": {
+		"revision": "034a684356c19021a187cda4d7f823298b913921",
+		"files": {
+			"config.json": "8135d646cd810090349e8833b7ba593ac3b72d632f8858cb34925bdbcb6a1bea",
+			"generation_config.json": "fb6be7759d385eea2d9f79f767fa80669e9ba74ba02de1db6ec9dbc950cf20f0",
+			"tokenizer.json": "109bb62e1c598287f5960616c869e15be54785a3c2906903dafe044241d50b61",
+			"tokenizer_config.json": "2ab016d442c2d3271a04547586a68322e9aedb65097349482d5374fe6d8abde2",
+			"onnx/encoder_model_quantized.onnx": "53c354d87ced44b39085fe8a46a25f09ea4578d442dbce9663f3977228f8a04e",
+			"onnx/decoder_model_merged_quantized.onnx": "c0e553b0c26611780c70417c9b4c1ca7169e9cdb18ba9e649197efb017af9f02"
+		}
+	},
+	"Xenova/opus-mt-ar-en": {
+		"revision": "09c7556866400dcc53562ba8d7035119e7d9a2c1",
+		"files": {
+			"config.json": "451ee0da95b01fe58d78f05c47e9ad89f0a17a4c03dcecb389136a12248ef9aa",
+			"generation_config.json": "6e240dc18d20cceb870d47706c90126a801f246db6009f9e02171795e9f93772",
+			"tokenizer.json": "86c78b55d2428e4479e21ce4c27266f7c5e1d52bcabcadff29bfda77f6ad3200",
+			"tokenizer_config.json": "3d4d5af649635fabf681f0618849ada5b872f72d025d6297896d46ddf5ce3770",
+			"onnx/encoder_model_quantized.onnx": "d9b0d612acff86cf87634b49bda566d1ef39b312837de549786ea18fecefc708",
+			"onnx/decoder_model_merged_quantized.onnx": "cdb25ae736afe9d48035b0ea311ab4b25f315810fab7f3c6f6cb0d8d87af35fa"
+		}
+	}
+}

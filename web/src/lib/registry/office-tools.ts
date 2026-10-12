@@ -18,6 +18,10 @@ export const widgetTool = (id: string, key: WidgetKey, category: Tool['category'
 });
 
 export const officeTools: Tool[] = [
+	widgetTool('translate-document', 'translate', 'document', {
+		ar: { title: 'ترجمة المستندات (إنجليزي ↔ عربي)', desc: 'ترجم ملفات Word وPowerPoint وExcel والنصوص مع الحفاظ على التنسيق والجداول، ويصبح الاتجاه من اليمين لليسار تلقائيًا. الترجمة المجانية تتم على جهازك ولا يُرفع الملف.', keywords: ['ترجمة', 'ترجمة ملف', 'ترجمة وورد', 'ترجمة pdf', 'انجليزي عربي', 'translate'] },
+		en: { title: 'Translate documents (English ↔ Arabic)', desc: 'Translate Word, PowerPoint, Excel and text files keeping layout and tables; Arabic output turns right-to-left by itself. The free translation runs on your device — the file is not uploaded.', keywords: ['translate document', 'english to arabic', 'arabic to english', 'translate word', 'translate pdf'] }
+	}),
 	widgetTool('invoice-maker', 'invoice', 'office', {
 		ar: { title: 'إنشاء فاتورة PDF', desc: 'فاتورة عربية جاهزة للطباعة: الأصناف والخصم وضريبة القيمة المضافة والإجمالي بالحروف، وشعار شركتك، ورمز QR لهيئة الزكاة (السعودية).', keywords: ['فاتورة', 'فاتورة ضريبية', 'invoice', 'عرض سعر', 'زاتكا', 'فاتورة إلكترونية'] },
 		en: { title: 'Invoice maker (PDF)', desc: 'A print-ready Arabic/English invoice: items, discount, VAT, total in words, your logo, and the Saudi ZATCA QR code.', keywords: ['invoice', 'tax invoice', 'invoice generator', 'zatca', 'arabic invoice'] }

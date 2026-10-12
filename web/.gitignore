@@ -30,3 +30,5 @@ vite.config.ts.timestamp-*
 /static/pdfjs
 /static/pagedjs
 /static/tesseract
+/static/models
+/static/ort

@@ -35,3 +35,9 @@ for (const l of ['ara', 'eng']) {
 	cpSync(join(root, 'node_modules', '@tesseract.js-data', l, '4.0.0_best_int', `${l}.traineddata.gz`), join(tess, 'lang', `${l}.traineddata.gz`));
 }
 console.log('copy-assets: Tesseract worker, cores, ara+eng models → static/tesseract');
+
+// ONNX Runtime (WebAssembly) for the translation models; transformers.js would fetch it from a CDN.
+const ort = join(root, 'static', 'ort');
+mkdirSync(ort, { recursive: true });
+for (const f of ['ort-wasm-simd-threaded.jsep.mjs', 'ort-wasm-simd-threaded.jsep.wasm'])
+	cpSync(join(root, 'node_modules', 'onnxruntime-web', 'dist', f), join(ort, f));
