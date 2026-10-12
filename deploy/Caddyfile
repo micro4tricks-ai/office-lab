@@ -20,6 +20,17 @@
 		-Server
 	}
 
+	handle /api/translate* {
+		request_body {
+			max_size 1MB
+		}
+		reverse_proxy translate:8001 {
+			transport http {
+				read_timeout 5m
+			}
+		}
+	}
+
 	handle /api/* {
 		request_body {
 			max_size {$BODY_MAX:130MB}

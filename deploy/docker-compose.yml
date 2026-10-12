@@ -45,6 +45,28 @@ services:
     depends_on: [gotenberg]
     restart: unless-stopped
 
+  # Professional translation (Claude). The same image as the API, but on its own: it holds the API key
+  # and may reach the internet, while the converters stay offline. Without ANTHROPIC_API_KEY it only
+  # answers "not available" (the free translation runs in the browser).
+  translate:
+    build: ../server
+    command: ["uvicorn", "app.translate:app", "--host", "0.0.0.0", "--port", "8001", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/api/translate/status')"]
+      interval: 30s
+      timeout: 5s
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      TRANSLATE_MODEL: ${TRANSLATE_MODEL:-claude-sonnet-5-5}
+      PRO_DAILY_CHARS: ${PRO_DAILY_CHARS:-300000}
+    tmpfs:
+      - /tmp:size=16m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    networks: [internal, egress]
+    restart: unless-stopped
+
   gotenberg:
     image: gotenberg/gotenberg:8.37.0@sha256:f29984bd1e226bf1b93ba90af06000afa8b315853e99d27b9aaa41b93f15c769
     command:

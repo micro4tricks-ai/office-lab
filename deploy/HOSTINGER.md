@@ -84,6 +84,16 @@ cd /opt/office-lab && git pull && cd deploy && docker compose up -d --build && d
 
 بعد أي تعديل: `docker compose up -d`.
 
+**الترجمة الاحترافية (Claude) — اختيارية:** الترجمة المجانية تعمل في متصفح الزائر ولا تحتاج شيئًا هنا. لتفعيل «ترجمة احترافية» أضف في `deploy/.env`:
+
+| المتغير | المعنى |
+|---|---|
+| `ANTHROPIC_API_KEY` | مفتاح من https://console.anthropic.com — الاستخدام يُحاسب على حسابك |
+| `TRANSLATE_MODEL` | النموذج (الافتراضي `claude-sonnet-5-5`) |
+| `PRO_DAILY_CHARS` | أقصى عدد حروف يُترجم يوميًا لكل الزوار معًا (الافتراضي 300000) — حماية للفاتورة |
+
+المفتاح موجود فقط في حاوية `translate` المنفصلة، ولا يظهر في السجلات.
+
 **ربط نسخة GitHub Pages بهذا الخادم (اختياري):** ضع `CORS_ORIGINS=https://micro4tricks-ai.github.io` هنا، وفي GitHub أضف متغير المستودع `PUBLIC_API_URL=https://الدومين` (Settings → Secrets and variables → Actions → Variables)، ثم أعد النشر.
 
 ## 8) حل المشاكل
