@@ -81,6 +81,8 @@ cd /opt/office-lab && git pull && cd deploy && docker compose up -d --build && d
 | `RATE_LIMIT` | `30/minute` | عدد الطلبات لكل عنوان IP |
 | `CONCURRENCY` | عدد الأنوية | عدد التحويلات في نفس الوقت |
 | `CORS_ORIGINS` | فارغ | مواقع أخرى مسموح لها تستخدم الـAPI (مثل نسخة GitHub Pages) |
+| `API_KEYS` | فارغ | مفاتيح البرامج الأخرى (بصمات فقط، مفصولة بفاصلة) — انظر أسفل |
+| `KEY_RATE_LIMIT` | `120/minute` | عدد الطلبات لكل مفتاح |
 
 بعد أي تعديل: `docker compose up -d`.
 
@@ -93,6 +95,15 @@ cd /opt/office-lab && git pull && cd deploy && docker compose up -d --build && d
 | `PRO_DAILY_CHARS` | أقصى عدد حروف يُترجم يوميًا لكل الزوار معًا (الافتراضي 300000) — حماية للفاتورة |
 
 المفتاح موجود فقط في حاوية `translate` المنفصلة، ولا يظهر في السجلات.
+
+**مفاتيح الـAPI لبرامج أخرى (اختياري):** الموقع نفسه لا يحتاج مفتاحًا. لو نظام في مكتب أو سكربت هيستخدم التحويل مباشرة، اعمل له مفتاحًا:
+
+```bash
+cd ~/office-lab/deploy
+docker compose exec api python -m app.keys new accounting-office
+```
+
+يطبع المفتاح (`olab_...`) مرة واحدة فقط — أعطه للمستخدم — وسطرًا مثل `accounting-office:3f9a…`. ضع هذا السطر في `API_KEYS` (لو أكثر من مفتاح افصل بفاصلة) ثم `docker compose up -d`. لإلغاء مفتاح احذف سطره. طريقة الاستخدام والأمثلة في صفحة «واجهة البرمجة» على الموقع (`/ar/api/`).
 
 **ربط نسخة GitHub Pages بهذا الخادم (اختياري):** ضع `CORS_ORIGINS=https://micro4tricks-ai.github.io` هنا، وفي GitHub أضف متغير المستودع `PUBLIC_API_URL=https://الدومين` (Settings → Secrets and variables → Actions → Variables)، ثم أعد النشر.
 

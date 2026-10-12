@@ -20,7 +20,7 @@ Spec: `docs/BUILD_PROMPT.md`. State + next step: `docs/PROGRESS.md`.
 - Git Bash on Windows mangles `/office-lab`: prefix commands with `MSYS_NO_PATHCONV=1`.
 - `vite preview` keeps serving the build it started with: restart it after every build (Playwright reuses a running one locally).
 - Service worker lives in `src/service-worker/index.ts` (own tsconfig). Playwright: a page claimed mid-visit may bypass it — reload first.
-- Bash heredocs here eat backslashes (`'\'`, `/\/g`): write such code with the Write tool.
+- Bash heredocs here eat backslashes (`'\'`, `/\/g`): write such code with the Write tool, and check `‎`-style escapes in regexes stayed escapes (semgrep flags literal bidi marks).
 - Workers have no `document`: pdf.js needs the OffscreenCanvas factories in `adapters/pdf/pdfjs.ts`; pdf-lib can't shape Arabic (draw text as PNG via `adapters/text-image.ts`).
 
 ## Commands (run in `web/`)
@@ -29,6 +29,7 @@ npm run dev                                   # local dev at /
 MSYS_NO_PATHCONV=1 BASE_PATH=/office-lab npm run build   # Pages-style build → web/build
 npm run check                                 # svelte-check
 npx vitest run                                # unit tests (formats.test.ts: docs/FORMATS.md is generated — UPDATE_FORMATS=1 to refresh)
+node scripts/fetch-models.mjs --update        # after adding a model to scripts/models.json (pins SHA-256)
 MSYS_NO_PATHCONV=1 BASE_PATH=/office-lab npx playwright test   # e2e (needs a build first)
 ```
 
