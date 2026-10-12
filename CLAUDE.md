@@ -26,7 +26,7 @@ Spec: `docs/BUILD_PROMPT.md`. State + next step: `docs/PROGRESS.md`.
 npm run dev                                   # local dev at /
 MSYS_NO_PATHCONV=1 BASE_PATH=/office-lab npm run build   # Pages-style build → web/build
 npm run check                                 # svelte-check
-npx vitest run                                # unit tests
+npx vitest run                                # unit tests (formats.test.ts: docs/FORMATS.md is generated — UPDATE_FORMATS=1 to refresh)
 MSYS_NO_PATHCONV=1 BASE_PATH=/office-lab npx playwright test   # e2e (needs a build first)
 ```
 
