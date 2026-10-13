@@ -39,10 +39,39 @@ if [ -n "$proxy" ]; then
 	if docker inspect "$proxy" --format '{{.Config.Image}}' | grep -qi traefik; then
 		traefik="$proxy"
 		echo "==> Found Traefik ($traefik) on 443: Office Lab will run behind it"
+		# Traefik before 3.6 can't talk to Docker 29+: it would never see our container (404).
+		tv="$(docker exec "$traefik" traefik version 2>/dev/null | awk '/^Version:/ {print $2}' | sed 's/^v//' || true)"
+		dv="$(docker version --format '{{.Server.Version}}' | cut -d. -f1)"
+		tmaj="$(echo "${tv:-0}" | cut -d. -f1)"
+		tmin="$(echo "${tv:-0.0}" | cut -d. -f2)"
+		echo "    Traefik ${tv:-unknown}, Docker $dv"
+		if [ -z "$tv" ]; then
+			echo "    Warning: could not read the Traefik version; it must be v3.6+ with Docker 29+."
+		elif [ "$dv" -ge 29 ] && { [ "$tmaj" -lt 3 ] || { [ "$tmaj" -eq 3 ] && [ "$tmin" -lt 6 ]; }; }; then
+			echo "Traefik ${tv:-?} is too old for Docker $dv: update it to v3.6 or newer first." >&2
+			echo "In n8n's docker-compose.yml set 'image: traefik:v3.6', then 'docker compose up -d' there." >&2
+			exit 1
+		fi
+		if ! docker inspect "$traefik" --format '{{join .Config.Cmd " "}} {{join .Args " "}}' | grep -q readTimeout; then
+			echo "    Note: Traefik stops uploads after 60 s by default (big videos on slow lines)."
+			echo "    Add --entrypoints.websecure.transport.respondingTimeouts.readTimeout=600s to it if needed."
+		fi
 	else
 		echo "Port 443 is used by '$proxy' (not Traefik). See deploy/HOSTINGER.md §9." >&2
 		exit 1
 	fi
+fi
+
+echo "==> Room on this server"
+mem_mb="$(awk '/MemAvailable/ {print int($2 / 1024)}' /proc/meminfo)"
+disk_gb="$(df -BG --output=avail / | tail -n1 | tr -dc '0-9')"
+echo "    free RAM ${mem_mb} MB, free disk ${disk_gb} GB"
+if [ "$disk_gb" -lt 15 ]; then
+	echo "Needs at least 15 GB free disk (the images are ~9 GB); try 'docker system prune -af'." >&2
+	exit 1
+fi
+if [ "$mem_mb" -lt 3000 ]; then
+	echo "    Warning: under 3 GB RAM free; keep CONCURRENCY=1 or 2 in deploy/.env."
 fi
 
 echo "==> Firewall: SSH, HTTP, HTTPS only"
@@ -69,6 +98,13 @@ if [ ! -f "$ENV" ]; then
 		if ! echo "$domain" | grep -Eq '^[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'; then
 			echo "That doesn't look like a domain name: $domain" >&2
 			exit 1
+		fi
+		# The certificate is only issued if the domain already points here.
+		dns="$(getent ahostsv4 "$domain" | awk '{print $1; exit}' || true)"
+		if [ -z "$dns" ]; then
+			echo "    Warning: $domain has no A record yet; HTTPS starts once it points at this server."
+		elif ! hostname -I | tr ' ' '\n' | grep -qx "$dns"; then
+			echo "    Warning: $domain points at $dns, not at this server ($(hostname -I | awk '{print $1}'))."
 		fi
 		sed -i "s|^DOMAIN=.*|DOMAIN=$domain|" "$ENV"
 		sed -i "s|^SITE_ORIGIN=.*|SITE_ORIGIN=https://$domain|" "$ENV"
