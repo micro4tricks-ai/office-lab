@@ -10,10 +10,12 @@ services:
       dockerfile: deploy/Caddy.Dockerfile
       args:
         PUBLIC_SITE_ORIGIN: ${SITE_ORIGIN:-}
+    # Another proxy already on 80/443 (a second app on the same server)? Set HTTP_PORT/HTTPS_PORT.
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    mem_limit: 256m
     environment:
       DOMAIN: ${DOMAIN:-:80}
       BODY_MAX: ${BODY_MAX:-130MB}
@@ -41,6 +43,8 @@ services:
       - jobs:/work
     tmpfs:
       - /tmp:size=64m
+    # Caps so a busy day can't starve other programs on the same server (deploy/HOSTINGER.md §9).
+    mem_limit: ${API_MEM:-2g}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
@@ -65,6 +69,7 @@ services:
       PRO_DAILY_CHARS: ${PRO_DAILY_CHARS:-300000}
     tmpfs:
       - /tmp:size=16m
+    mem_limit: 256m
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
@@ -85,6 +90,7 @@ services:
       - --webhook-disable
       - --api-disable-download-from
       - --prometheus-disable-collect
+    mem_limit: ${GOTENBERG_MEM:-2g}
     security_opt: ["no-new-privileges:true"]
     # internal: talks to the API; egress: fetches public pages for URL → PDF.
     networks: [internal, egress]
