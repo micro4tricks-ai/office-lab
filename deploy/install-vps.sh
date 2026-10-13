@@ -90,6 +90,7 @@ if [ ! -f "$ENV" ]; then
 			echo "# Behind the existing Traefik ($traefik) — written by install-vps.sh"
 			echo "COMPOSE_FILE=docker-compose.yml:docker-compose.traefik.yml"
 			echo "LAB_HOST=$domain"
+			echo "TRAEFIK_HOST=$traefik"
 			echo "TRAEFIK_NETWORK=$net"
 			echo "TRAEFIK_CERTRESOLVER=${resolver:-mytlschallenge}"
 			echo "TRAEFIK_ENTRYPOINT=${entry:-websecure}"

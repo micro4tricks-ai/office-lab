@@ -1,14 +1,26 @@
 # Same server as n8n (Hostinger's n8n template already runs Traefik on 80/443).
 # Traefik does HTTPS and hands lab.example.com to our Caddy; nothing else changes.
 #   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d --build
-# Needs in deploy/.env: DOMAIN=:80, LAB_HOST, TRAEFIK_NETWORK, TRAEFIK_CERTRESOLVER (HOSTINGER.md §9).
+# Needs in deploy/.env: DOMAIN=:80, LAB_HOST, TRAEFIK_HOST, TRAEFIK_NETWORK, TRAEFIK_CERTRESOLVER
+# (install-vps.sh writes them; HOSTINGER.md §9).
 services:
   caddy:
     ports: !reset []
-    environment:
-      # Caddy is reachable only from Docker networks here, so trust Traefik's X-Forwarded-For.
-      TRUSTED_PROXIES: private_ranges
     networks: [edge, internal, traefik]
+    environment:
+      TRAEFIK_HOST: ${TRAEFIK_HOST:?set TRAEFIK_HOST (the Traefik container name)}
+    # Trust X-Forwarded-For from Traefik's own address only (looked up at start), so visitors keep
+    # their own rate limits and nobody else on the network can claim another address. If Traefik
+    # comes back with a new address, Caddy restarts and picks it up.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        find_ip() { getent hosts "$$TRAEFIK_HOST" | awk '{print $$1; exit}'; }
+        ip="$$(find_ip)"
+        [ -n "$$ip" ] || { echo "Traefik container '$$TRAEFIK_HOST' not found" >&2; sleep 5; exit 1; }
+        case "$$ip" in *:*) export TRUSTED_PROXIES="$$ip/128" ;; *) export TRUSTED_PROXIES="$$ip/32" ;; esac
+        (while sleep 60; do [ "$$(find_ip)" = "$$ip" ] || kill 1; done) &
+        exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
     labels:
       - traefik.enable=true
       - traefik.docker.network=${TRAEFIK_NETWORK:?set TRAEFIK_NETWORK}

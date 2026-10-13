@@ -4,9 +4,11 @@
 
 {
 	servers {
-		# Only behind another proxy (docker-compose.traefik.yml sets private_ranges): take the visitor's
+		# Only behind another proxy (docker-compose.traefik.yml sets Traefik's address): take the visitor's
 		# address from its X-Forwarded-For, or every visitor would share one rate limit. Default: nobody.
 		trusted_proxies static {$TRUSTED_PROXIES:127.0.0.1/32}
+		# Right to left: a visitor's own X-Forwarded-For entries can't stand in for their address.
+		trusted_proxies_strict
 	}
 }
 
@@ -33,6 +35,8 @@
 			max_size 1MB
 		}
 		reverse_proxy translate:8001 {
+			# The API trusts this header: send only the address Caddy settled on.
+			header_up X-Forwarded-For {client_ip}
 			transport http {
 				read_timeout 5m
 			}
@@ -44,6 +48,7 @@
 			max_size {$BODY_MAX:130MB}
 		}
 		reverse_proxy api:8000 {
+			header_up X-Forwarded-For {client_ip}
 			# Conversions can take minutes (OCR of a long scan, big ebooks).
 			transport http {
 				read_timeout 15m

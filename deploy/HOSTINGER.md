@@ -143,6 +143,7 @@ DOMAIN=:80
 CONCURRENCY=2
 COMPOSE_FILE=docker-compose.yml:docker-compose.traefik.yml
 LAB_HOST=lab.example.com
+TRAEFIK_HOST=...           # اسم حاوية Traefik
 TRAEFIK_NETWORK=...        # شبكة Traefik
 TRAEFIK_CERTRESOLVER=...   # غالبًا mytlschallenge
 TRAEFIK_ENTRYPOINT=websecure
