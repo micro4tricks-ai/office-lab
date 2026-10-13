@@ -2,6 +2,14 @@
 # domain name pointing at this server; locally DOMAIN=:80 serves plain http://localhost.
 # (No ACME email: Let's Encrypt stopped sending expiry emails in 2025, and Caddy renews by itself.)
 
+{
+	servers {
+		# Only behind another proxy (docker-compose.traefik.yml sets private_ranges): take the visitor's
+		# address from its X-Forwarded-For, or every visitor would share one rate limit. Default: nobody.
+		trusted_proxies static {$TRUSTED_PROXIES:127.0.0.1/32}
+	}
+}
+
 {$DOMAIN::80} {
 	encode zstd gzip
 

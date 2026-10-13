@@ -5,6 +5,9 @@
 services:
   caddy:
     ports: !reset []
+    environment:
+      # Caddy is reachable only from Docker networks here, so trust Traefik's X-Forwarded-For.
+      TRUSTED_PROXIES: private_ranges
     networks: [edge, internal, traefik]
     labels:
       - traefik.enable=true

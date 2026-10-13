@@ -43,14 +43,14 @@ if [ -n "$proxy" ]; then
 		echo "Port 443 is used by '$proxy' (not Traefik). See deploy/HOSTINGER.md §9." >&2
 		exit 1
 	fi
-else
-	echo "==> Firewall: SSH, HTTP, HTTPS only"
-	ufw allow 22/tcp >/dev/null
-	ufw allow 80/tcp >/dev/null
-	ufw allow 443/tcp >/dev/null
-	ufw allow 443/udp >/dev/null
-	ufw --force enable >/dev/null
 fi
+
+echo "==> Firewall: SSH, HTTP, HTTPS only"
+ufw allow 22/tcp >/dev/null
+ufw allow 80/tcp >/dev/null
+ufw allow 443/tcp >/dev/null
+ufw allow 443/udp >/dev/null
+ufw --force enable >/dev/null
 
 echo "==> Code in $DIR"
 if [ -d "$DIR/.git" ]; then
