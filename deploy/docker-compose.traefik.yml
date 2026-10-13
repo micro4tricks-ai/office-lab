@@ -1,0 +1,21 @@
+# Same server as n8n (Hostinger's n8n template already runs Traefik on 80/443).
+# Traefik does HTTPS and hands lab.example.com to our Caddy; nothing else changes.
+#   docker compose -f docker-compose.yml -f docker-compose.traefik.yml up -d --build
+# Needs in deploy/.env: DOMAIN=:80, LAB_HOST, TRAEFIK_NETWORK, TRAEFIK_CERTRESOLVER (HOSTINGER.md §9).
+services:
+  caddy:
+    ports: !reset []
+    networks: [edge, internal, traefik]
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK:?set TRAEFIK_NETWORK}
+      - traefik.http.routers.officelab.rule=Host(`${LAB_HOST:?set LAB_HOST}`)
+      - traefik.http.routers.officelab.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}
+      - traefik.http.routers.officelab.tls=true
+      - traefik.http.routers.officelab.tls.certresolver=${TRAEFIK_CERTRESOLVER:-mytlschallenge}
+      - traefik.http.services.officelab.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    name: ${TRAEFIK_NETWORK}
+    external: true
